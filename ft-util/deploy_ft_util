@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# Download latest ft-util script from https://github.com/Futur-Tech/ft-util/ into the directory
+# You can adjust this script to add or remove script based on your needs
+
+FT_UTIL_DIR=$(dirname "$0")
+FT_UTIL_REPO="https://raw.githubusercontent.com/Futur-Tech/ft-util/main"
+
+function download_file {
+    wget --quiet "${FT_UTIL_REPO}/${1}" --output-document="${FT_UTIL_DIR}/${1}"
+    echo "Downloaded: ${FT_UTIL_REPO}/${1}"
+}
+
+rm ${FT_UTIL_DIR}/ft_util_*
+echo "rm ${FT_UTIL_REPO}/ft_util_* done"
+
+download_file ft_util_inc_var
+download_file ft_util_log
+download_file ft_util_pkg
+
+download_file README.md
+
+chmod +x ${FT_UTIL_DIR}/ft_util_*
+echo "chmod +x ${FT_UTIL_DIR}/ft_util_* done"

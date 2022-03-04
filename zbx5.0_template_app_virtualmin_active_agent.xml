@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2022-03-02T00:22:42Z</date>
+    <groups>
+        <group>
+            <name>Templates/Futur-Tech/Modules Linux</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template Futur-Tech Module Linux Virtualmin</template>
+            <name>Template Futur-Tech Module Linux Virtualmin</name>
+            <groups>
+                <group>
+                    <name>Templates/Futur-Tech/Modules Linux</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Virtualmin Backups</name>
+                </application>
+                <application>
+                    <name>Virtualmin Backups Dashboard</name>
+                </application>
+                <application>
+                    <name>Virtualmin Domains</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Scheduled backups Discovery</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>virtualmin.bkp.discovery</key>
+                    <delay>8h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup age</name>
+                            <type>CALCULATED</type>
+                            <key>virtualmin.bkp.last.age[{#ID}]</key>
+                            <delay>15m</delay>
+                            <units>uptime</units>
+                            <params>now(&quot;virtualmin.bkp.last.ended[{#ID}]&quot;)-last(&quot;virtualmin.bkp.last.ended[{#ID}]&quot;)</params>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                                <application>
+                                    <name>Virtualmin Backups Dashboard</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$VIRTUALMIN.BACKUP.AGE.ERROR:&quot;{{#INCR}.regsub(\&quot;Yes\&quot;, \&quot;incremental\&quot;)}{{#INCR}.regsub(\&quot;No\&quot;, \&quot;full\&quot;)}&quot;}</expression>
+                                    <name>No Virtualmin Backup of {#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} for more than {$VIRTUALMIN.BACKUP.AGE.ERROR}</name>
+                                    <opdata>Last backup age: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup domains</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.bkp.last.domains[{#ID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['Domains']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.bkp.last[{#ID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup date</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.bkp.last.ended[{#ID}]</key>
+                            <delay>0</delay>
+                            <units>unixtime</units>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['Ended']</params>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <params>/
+                                    </params>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <params>var split = value.split(' ');
+MONTHS_LIST = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+month_index = ('0' + (MONTHS_LIST.indexOf(split[1]) + 1)).slice(-2);
+ISOdate = split[2] + '-' + month_index + '-' + split[0] + 'T' + split[3];
+var ts = new Date(ISOdate).valueOf() / 1000;
+tz = new Date().getTimezoneOffset() * 60;
+return ts + tz;</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.bkp.last[{#ID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup status</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.bkp.last.final_status[{#ID}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['Final status']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.bkp.last[{#ID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup size</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.bkp.last.size[{#ID}]</key>
+                            <delay>0</delay>
+                            <units>B</units>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['Final size']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.bkp.last[{#ID}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)} backup</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>virtualmin.bkp.last[{#ID}]</key>
+                            <delay>15m</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Backups</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template Futur-Tech Module Linux Virtualmin:virtualmin.bkp.last.final_status[{#ID}].last()}&lt;&gt;&quot;OK&quot;&#13;
+and {Template Futur-Tech Module Linux Virtualmin:virtualmin.bkp.last.age[{#ID}].now()}&gt;0</expression>
+                            <name>Failed Virtualmin Backup of {#DN}[{#FEAT}] {{#INCR}.regsub(&quot;Yes&quot;, &quot;incremental&quot;)}{{#INCR}.regsub(&quot;No&quot;, &quot;full&quot;)}</name>
+                            <opdata>Failed backup age: {ITEM.LASTVALUE2}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#DN}</lld_macro>
+                            <path>$.['DETAILS'].['Domains']</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#FEAT}</lld_macro>
+                            <path>$.['DETAILS'].['Features']</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#ID}</lld_macro>
+                            <path>$.['INDEX']</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#INCR}</lld_macro>
+                            <path>$.['DETAILS'].['Incremental']</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Enabled domains Discovery</name>
+                    <type>ZABBIX_ACTIVE</type>
+                    <key>virtualmin.domain.discovery</key>
+                    <delay>8h</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#DN} configuration check</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>virtualmin.domain.check[{#DN}]</key>
+                            <delay>8h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Domains</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&lt;&gt;&quot;All features OK&quot;</expression>
+                                    <name>Virtualmin domain {#DN} configuration check failed</name>
+                                    <opdata>Check result: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN} configuration: PHP version</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.domain.info.php_version[{#DN}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Domains</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['PHP version']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.domain.info[{#DN}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN} configuration: SSL cert expiry</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.domain.info.ssl_expiry[{#DN}]</key>
+                            <delay>0</delay>
+                            <units>unixtime</units>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Domains</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['SSL cert expiry time']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.domain.info[{#DN}]</key>
+                            </master_item>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{now()}&gt;{last()}</expression>
+                                    <name>Virtualmin domain {#DN} SSL certificat expired</name>
+                                    <opdata>Check result: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>HIGH</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN} configuration: URL</name>
+                            <type>DEPENDENT</type>
+                            <key>virtualmin.domain.info.url[{#DN}]</key>
+                            <delay>0</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Domains</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.['DETAILS'].['URL']</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>virtualmin.domain.info[{#DN}]</key>
+                            </master_item>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#DN} configuration</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>virtualmin.domain.info[{#DN}]</key>
+                            <delay>4h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <applications>
+                                <application>
+                                    <name>Virtualmin Domains</name>
+                                </application>
+                            </applications>
+                        </item_prototype>
+                    </item_prototypes>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#DN}</lld_macro>
+                            <path>$.['domain']</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$VIRTUALMIN.BACKUP.AGE.ERROR:&quot;full&quot;}</macro>
+                    <value>10d</value>
+                </macro>
+                <macro>
+                    <macro>{$VIRTUALMIN.BACKUP.AGE.ERROR:&quot;incremental&quot;}</macro>
+                    <value>3d</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
