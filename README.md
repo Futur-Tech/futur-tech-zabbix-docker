@@ -1,7 +1,11 @@
-# Zabbix Postfix Virtualmin
-Zabbix template for Virtualmin
+# Zabbix Monitoring Docker
+Zabbix template for Docker.
 
-Works for Zabbix 5.x Active Agent
+The only difference with the official template is:
+- Use of Active Agent
+- deploy.sh to setup proper permission for **Zabbix Agent 2**
+
+Works for Zabbix 5.x Active Agent 2
 
 ## Deploy Commands
 
@@ -9,8 +13,8 @@ Everything is executed by only a few basic deploy scripts.
 
 ```bash
 cd /usr/local/src
-git clone https://github.com/Futur-Tech/futur-tech-zabbix-virtualmin.git
-cd futur-tech-zabbix-virtualmin
+git clone https://github.com/Futur-Tech/futur-tech-zabbix-docker.git
+cd futur-tech-zabbix-docker
 
 ./deploy.sh 
 # Main deploy script
