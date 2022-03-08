@@ -85,8 +85,15 @@ echo_log () {
     if [ -n "${log_msg}" ]
     then
         timestamp="$(date +\%Y-\%m-\%d\ \%H:\%M:\%S)"
-        term_colors=$(tput colors -T $TERM) #check if terminal support colors
         
+        # Check if terminal support colors
+        if command -v tput >/dev/null
+        then
+            term_colors=$(tput colors -T $TERM)
+        else
+            term_colors=2
+        fi
+
         # First output to stdout with or formatting formatting 
         if [ -n "${term_colors}" ] && [ $term_colors -ge 8 ]
         then
