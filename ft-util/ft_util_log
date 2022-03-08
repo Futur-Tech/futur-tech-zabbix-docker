@@ -89,7 +89,7 @@ echo_log () {
         # Check if terminal support colors
         if command -v tput >/dev/null
         then
-            term_colors=$(tput colors -T $TERM)
+            term_colors=$(tput colors -T $TERM 2>/dev/null)
         else
             term_colors=2
         fi
