@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2022-03-04T10:31:57Z</date>
+    <date>2022-03-12T09:10:51Z</date>
     <groups>
         <group>
             <name>Templates/Futur-Tech/Applications</name>
@@ -181,28 +181,6 @@ Template tooling version used: 0.39</description>
                     </preprocessing>
                     <master_item>
                         <key>docker.info</key>
-                    </master_item>
-                </item>
-                <item>
-                    <name>Docker: Containers size</name>
-                    <type>DEPENDENT</type>
-                    <key>docker.containers_size</key>
-                    <delay>0</delay>
-                    <history>7d</history>
-                    <units>B</units>
-                    <applications>
-                        <application>
-                            <name>Docker</name>
-                        </application>
-                    </applications>
-                    <preprocessing>
-                        <step>
-                            <type>JSONPATH</type>
-                            <params>$.Containers[*].SizeRw.sum()</params>
-                        </step>
-                    </preprocessing>
-                    <master_item>
-                        <key>docker.data_usage</key>
                     </master_item>
                 </item>
                 <item>
@@ -1176,6 +1154,7 @@ Template tooling version used: 0.39</description>
             <discovery_rules>
                 <discovery_rule>
                     <name>Containers discovery</name>
+                    <type>ZABBIX_ACTIVE</type>
                     <key>docker.containers.discovery[false]</key>
                     <delay>15m</delay>
                     <filter>
@@ -2303,6 +2282,7 @@ false - Returns only running containers</description>
                 </discovery_rule>
                 <discovery_rule>
                     <name>Images discovery</name>
+                    <type>ZABBIX_ACTIVE</type>
                     <key>docker.images.discovery</key>
                     <delay>15m</delay>
                     <filter>
@@ -2374,6 +2354,147 @@ false - Returns only running containers</description>
                     </item_prototypes>
                 </discovery_rule>
             </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$DOCKER.LLD.FILTER.CONTAINER.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>Filter of discoverable containers</description>
+                </macro>
+                <macro>
+                    <macro>{$DOCKER.LLD.FILTER.CONTAINER.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>Filter to exclude discovered containers</description>
+                </macro>
+                <macro>
+                    <macro>{$DOCKER.LLD.FILTER.IMAGE.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>Filter of discoverable images</description>
+                </macro>
+                <macro>
+                    <macro>{$DOCKER.LLD.FILTER.IMAGE.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>Filter to exclude discovered images</description>
+                </macro>
+            </macros>
+            <screens>
+                <screen>
+                    <name>Docker overview</name>
+                    <hsize>2</hsize>
+                    <vsize>5</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Docker: Containers</name>
+                                <host>Template Futur-Tech App Docker Active Agent</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>25</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Docker: Size</name>
+                                <host>Template Futur-Tech App Docker Active Agent</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>1</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>25</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Docker: Memory total</name>
+                                <host>Template Futur-Tech App Docker Active Agent</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>25</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Docker: Goroutines</name>
+                                <host>Template Futur-Tech App Docker Active Agent</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>1</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>25</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>0</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Docker: Images</name>
+                                <host>Template Futur-Tech App Docker Active Agent</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>2</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>25</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+            </screens>
         </template>
     </templates>
     <graphs>
