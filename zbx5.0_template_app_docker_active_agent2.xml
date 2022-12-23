@@ -96,6 +96,28 @@ Template tooling version used: 0.39</description>
                     </applications>
                 </item>
                 <item>
+                    <name>Docker: Containers size</name>
+                    <type>DEPENDENT</type>
+                    <key>docker.containers_size</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>Docker</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.Containers[*].SizeRw.sum()</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>docker.data_usage</key>
+                    </master_item>
+                </item>
+                <item>
                     <name>Docker: Containers paused</name>
                     <type>DEPENDENT</type>
                     <key>docker.containers.paused</key>
@@ -452,6 +474,28 @@ Template tooling version used: 0.39</description>
                     </applications>
                 </item>
                 <item>
+                    <name>Docker: Images size</name>
+                    <type>DEPENDENT</type>
+                    <key>docker.images_size</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>Docker</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.Images[*].Size.sum()</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>docker.data_usage</key>
+                    </master_item>
+                </item>
+                <item>
                     <name>Docker: Images available</name>
                     <type>DEPENDENT</type>
                     <key>docker.images.top_level</key>
@@ -493,28 +537,6 @@ Template tooling version used: 0.39</description>
                     </preprocessing>
                     <master_item>
                         <key>docker.info</key>
-                    </master_item>
-                </item>
-                <item>
-                    <name>Docker: Images size</name>
-                    <type>DEPENDENT</type>
-                    <key>docker.images_size</key>
-                    <delay>0</delay>
-                    <history>7d</history>
-                    <units>B</units>
-                    <applications>
-                        <application>
-                            <name>Docker</name>
-                        </application>
-                    </applications>
-                    <preprocessing>
-                        <step>
-                            <type>JSONPATH</type>
-                            <params>$.Images[*].Size.sum()</params>
-                        </step>
-                    </preprocessing>
-                    <master_item>
-                        <key>docker.data_usage</key>
                     </master_item>
                 </item>
                 <item>
@@ -563,38 +585,6 @@ Template tooling version used: 0.39</description>
                     </master_item>
                 </item>
                 <item>
-                    <name>Docker: Kernel memory enabled</name>
-                    <type>DEPENDENT</type>
-                    <key>docker.kernel_mem.enabled</key>
-                    <delay>0</delay>
-                    <history>7d</history>
-                    <applications>
-                        <application>
-                            <name>Docker</name>
-                        </application>
-                    </applications>
-                    <valuemap>
-                        <name>Docker flag</name>
-                    </valuemap>
-                    <preprocessing>
-                        <step>
-                            <type>JSONPATH</type>
-                            <params>$.KernelMemory</params>
-                        </step>
-                        <step>
-                            <type>BOOL_TO_DECIMAL</type>
-                            <params/>
-                        </step>
-                        <step>
-                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
-                            <params>1d</params>
-                        </step>
-                    </preprocessing>
-                    <master_item>
-                        <key>docker.info</key>
-                    </master_item>
-                </item>
-                <item>
                     <name>Docker: Kernel memory TCP enabled</name>
                     <type>DEPENDENT</type>
                     <key>docker.kernel_mem_tcp.enabled</key>
@@ -612,6 +602,38 @@ Template tooling version used: 0.39</description>
                         <step>
                             <type>JSONPATH</type>
                             <params>$.KernelMemoryTCP</params>
+                        </step>
+                        <step>
+                            <type>BOOL_TO_DECIMAL</type>
+                            <params/>
+                        </step>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1d</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>docker.info</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Docker: Kernel memory enabled</name>
+                    <type>DEPENDENT</type>
+                    <key>docker.kernel_mem.enabled</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Docker</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Docker flag</name>
+                    </valuemap>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.KernelMemory</params>
                         </step>
                         <step>
                             <type>BOOL_TO_DECIMAL</type>
@@ -735,28 +757,6 @@ Template tooling version used: 0.39</description>
                     </master_item>
                 </item>
                 <item>
-                    <name>Docker: Memory total</name>
-                    <type>DEPENDENT</type>
-                    <key>docker.mem.total</key>
-                    <delay>0</delay>
-                    <history>7d</history>
-                    <units>B</units>
-                    <applications>
-                        <application>
-                            <name>Docker</name>
-                        </application>
-                    </applications>
-                    <preprocessing>
-                        <step>
-                            <type>JSONPATH</type>
-                            <params>$.MemTotal</params>
-                        </step>
-                    </preprocessing>
-                    <master_item>
-                        <key>docker.info</key>
-                    </master_item>
-                </item>
-                <item>
                     <name>Docker: Memory limit enabled</name>
                     <type>DEPENDENT</type>
                     <key>docker.mem_limit.enabled</key>
@@ -782,6 +782,28 @@ Template tooling version used: 0.39</description>
                         <step>
                             <type>DISCARD_UNCHANGED_HEARTBEAT</type>
                             <params>1d</params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>docker.info</key>
+                    </master_item>
+                </item>
+                <item>
+                    <name>Docker: Memory total</name>
+                    <type>DEPENDENT</type>
+                    <key>docker.mem.total</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <units>B</units>
+                    <applications>
+                        <application>
+                            <name>Docker</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.MemTotal</params>
                         </step>
                     </preprocessing>
                     <master_item>
@@ -1182,7 +1204,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Container {#NAME}: Created</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.created[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.created["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>unixtime</units>
@@ -1202,13 +1224,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Finished at</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.finished[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.finished["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1229,13 +1251,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Image</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.image[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.image["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <trends>0</trends>
@@ -1248,7 +1270,7 @@ false - Returns only running containers</description>
                             <preprocessing>
                                 <step>
                                     <type>JSONPATH</type>
-                                    <params>$[?(@.Names[0] == &quot;{#NAME}&quot;)].Image.first()</params>
+                                    <params>$[?(@.Names[0] == "{#NAME}")].Image.first()</params>
                                 </step>
                                 <step>
                                     <type>DISCARD_UNCHANGED_HEARTBEAT</type>
@@ -1262,7 +1284,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Container {#NAME}: Restart count</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.restart_count[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.restart_count["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1277,13 +1299,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Started at</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.started[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.started["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1304,13 +1326,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Dead</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.dead[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.dead["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1332,13 +1354,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Error</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.error[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.error["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <trends>0</trends>
@@ -1359,7 +1381,7 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                             <trigger_prototypes>
                                 <trigger_prototype>
@@ -1374,7 +1396,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Container {#NAME}: Exit code</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.exitcode[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.exitcode["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1393,13 +1415,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: OOMKilled</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.oomkilled[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.oomkilled["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1421,13 +1443,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Paused</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.paused[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.paused["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1449,13 +1471,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Pid</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.pid[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.pid["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1474,13 +1496,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Restarting</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.restarting[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.restarting["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1502,13 +1524,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Running</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.running[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.running["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1530,13 +1552,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Status</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_info.state.status[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info.state.status["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <trends>0</trends>
@@ -1557,13 +1579,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_info["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Get info</name>
                             <type>ZABBIX_ACTIVE</type>
-                            <key>docker.container_info[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_info["{#NAME}"]</key>
                             <history>0</history>
                             <trends>0</trends>
                             <value_type>CHAR</value_type>
@@ -1577,7 +1599,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Container {#NAME}: CPU percent usage</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_pct_usage[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_pct_usage["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1594,13 +1616,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: CPU kernelmode usage per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.kernel.rate[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.kernel.rate["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1625,13 +1647,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Throttled periods</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.throttled_periods[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.throttled_periods["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <description>Number of periods when the container hits its throttling limit</description>
@@ -1647,13 +1669,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Throttled time</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.throttled_time[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.throttled_time["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1675,13 +1697,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Throttling periods</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.throttling_periods[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.throttling_periods["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <description>Number of periods with throttling active</description>
@@ -1697,13 +1719,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: CPU total usage per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.total.rate[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.total.rate["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1728,13 +1750,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: CPU usermode usage per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.cpu_usage.user.rate[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.cpu_usage.user.rate["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1759,13 +1781,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Memory commit bytes</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.memory.commit_bytes[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.memory.commit_bytes["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -1781,13 +1803,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Memory commit peak bytes</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.memory.commit_peak_bytes[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.memory.commit_peak_bytes["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -1803,13 +1825,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Memory maximum usage</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.memory.max_usage[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.memory.max_usage["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -1825,13 +1847,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Memory private working set</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.memory.private_working_set[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.memory.private_working_set["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -1847,13 +1869,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Memory usage</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.memory.usage[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.memory.usage["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -1869,13 +1891,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Online CPUs</name>
                             <type>DEPENDENT</type>
-                            <key>docker.container_stats.online_cpus[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats.online_cpus["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <application_prototypes>
@@ -1890,13 +1912,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Get stats</name>
                             <type>ZABBIX_ACTIVE</type>
-                            <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                            <key>docker.container_stats["{#NAME}"]</key>
                             <history>0</history>
                             <trends>0</trends>
                             <value_type>CHAR</value_type>
@@ -1910,7 +1932,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Container {#NAME}: Networks bytes received per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.rx_bytes[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.rx_bytes["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1933,13 +1955,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks incoming packets dropped per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.rx_dropped[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.rx_dropped["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1961,13 +1983,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks errors received per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.rx_errors[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.rx_errors["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -1989,13 +2011,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks packets received per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.rx_packets[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.rx_packets["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -2017,13 +2039,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks bytes sent per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.tx_bytes[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.tx_bytes["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -2046,13 +2068,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks outgoing packets dropped per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.tx_dropped[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.tx_dropped["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -2074,13 +2096,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks errors sent per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.tx_errors[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.tx_errors["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -2102,13 +2124,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                         <item_prototype>
                             <name>Container {#NAME}: Networks packets sent per second</name>
                             <type>DEPENDENT</type>
-                            <key>docker.networks.tx_packets[&quot;{#NAME}&quot;]</key>
+                            <key>docker.networks.tx_packets["{#NAME}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <value_type>FLOAT</value_type>
@@ -2130,13 +2152,13 @@ false - Returns only running containers</description>
                                 </step>
                             </preprocessing>
                             <master_item>
-                                <key>docker.container_stats[&quot;{#NAME}&quot;]</key>
+                                <key>docker.container_stats["{#NAME}"]</key>
                             </master_item>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Futur-Tech App Docker Active Agent:docker.container_info.state.exitcode[&quot;{#NAME}&quot;].last()}&gt;0 and {Template Futur-Tech App Docker Active Agent:docker.container_info.state.running[&quot;{#NAME}&quot;].last()}=0</expression>
+                            <expression>{Template Futur-Tech App Docker Active Agent:docker.container_info.state.exitcode["{#NAME}"].last()}&gt;0 and {Template Futur-Tech App Docker Active Agent:docker.container_info.state.running["{#NAME}"].last()}=0</expression>
                             <name>Container {#NAME}: Container has been stopped with error code</name>
                             <opdata>Exit code: {ITEM.LASTVALUE1}</opdata>
                             <priority>AVERAGE</priority>
@@ -2153,7 +2175,7 @@ false - Returns only running containers</description>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.container_stats.cpu_usage.kernel.rate[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.container_stats.cpu_usage.kernel.rate["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2162,7 +2184,7 @@ false - Returns only running containers</description>
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.container_stats.cpu_usage.user.rate[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.container_stats.cpu_usage.user.rate["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2171,7 +2193,7 @@ false - Returns only running containers</description>
                                     <color>F63100</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.container_stats.cpu_usage.total.rate[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.container_stats.cpu_usage.total.rate["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -2184,7 +2206,7 @@ false - Returns only running containers</description>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.container_stats.memory.usage[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.container_stats.memory.usage["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2193,7 +2215,7 @@ false - Returns only running containers</description>
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.container_stats.memory.max_usage[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.container_stats.memory.max_usage["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -2206,7 +2228,7 @@ false - Returns only running containers</description>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.rx_packets[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.rx_packets["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2215,7 +2237,7 @@ false - Returns only running containers</description>
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.tx_packets[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.tx_packets["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2224,7 +2246,7 @@ false - Returns only running containers</description>
                                     <color>F63100</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.rx_errors[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.rx_errors["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2233,7 +2255,7 @@ false - Returns only running containers</description>
                                     <color>A54F10</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.tx_errors[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.tx_errors["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2242,7 +2264,7 @@ false - Returns only running containers</description>
                                     <color>FC6EA3</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.rx_dropped[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.rx_dropped["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2251,7 +2273,7 @@ false - Returns only running containers</description>
                                     <color>6C59DC</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.tx_dropped[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.tx_dropped["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -2264,7 +2286,7 @@ false - Returns only running containers</description>
                                     <color>1A7C11</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.rx_bytes[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.rx_bytes["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -2273,7 +2295,7 @@ false - Returns only running containers</description>
                                     <color>2774A4</color>
                                     <item>
                                         <host>Template Futur-Tech App Docker Active Agent</host>
-                                        <key>docker.networks.tx_bytes[&quot;{#NAME}&quot;]</key>
+                                        <key>docker.networks.tx_bytes["{#NAME}"]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -2306,7 +2328,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Image {#NAME}: Created</name>
                             <type>DEPENDENT</type>
-                            <key>docker.image.created[&quot;{#ID}&quot;]</key>
+                            <key>docker.image.created["{#ID}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>unixtime</units>
@@ -2318,7 +2340,7 @@ false - Returns only running containers</description>
                             <preprocessing>
                                 <step>
                                     <type>JSONPATH</type>
-                                    <params>$[?(@.Id == &quot;{#ID}&quot;)].Created.first()</params>
+                                    <params>$[?(@.Id == "{#ID}")].Created.first()</params>
                                 </step>
                                 <step>
                                     <type>DISCARD_UNCHANGED_HEARTBEAT</type>
@@ -2332,7 +2354,7 @@ false - Returns only running containers</description>
                         <item_prototype>
                             <name>Image {#NAME}: Size</name>
                             <type>DEPENDENT</type>
-                            <key>docker.image.size[&quot;{#ID}&quot;]</key>
+                            <key>docker.image.size["{#ID}"]</key>
                             <delay>0</delay>
                             <history>7d</history>
                             <units>B</units>
@@ -2344,7 +2366,7 @@ false - Returns only running containers</description>
                             <preprocessing>
                                 <step>
                                     <type>JSONPATH</type>
-                                    <params>$[?(@.Id == &quot;{#ID}&quot;)].Size.first()</params>
+                                    <params>$[?(@.Id == "{#ID}")].Size.first()</params>
                                 </step>
                             </preprocessing>
                             <master_item>
