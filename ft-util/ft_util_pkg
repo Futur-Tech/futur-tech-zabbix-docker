@@ -4,25 +4,23 @@ source "$(dirname "$0")/ft_util_inc_var"
 
 while getopts "iu" o; do
     case "${o}" in
-        i)
-            install=true
-            ;;
-        u)
-            update=true        
-            ;;
+    i)
+        install=true
+        ;;
+    u)
+        update=true
+        ;;
     esac
 done
 
 shift "$((OPTIND - 1))"
 
-PKG_ARR=( "$@" )
+pkg_arr=("$@")
 
-if [ "$update" = true ]
-then
+if [ "$update" = true ]; then
     $S_LOG -d $S_NAME "Package list update"
     apt update &>/dev/null
-    if [ $? != "0" ]
-    then
+    if [ $? != "0" ]; then
         $S_LOG -s crit -d $S_NAME "Error while getting package list update."
     else
         $S_LOG -d $S_NAME "Successful package list update."
@@ -30,41 +28,38 @@ then
 fi
 
 # This var will increment for each pkg not found BUT will decrement if the package is successfully installed
-NOT_INSTALLED=0
+not_installed=0
 
-for PKG in "${PKG_ARR[@]}"
-do
-    PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $PKG 2>/dev/null | grep "install ok installed")
-    if [ "" = "$PKG_OK" ]; then        
-        let NOT_INSTALLED++
+for pkg in "${pkg_arr[@]}"; do
+    pkg_ok=$(dpkg-query -W --showformat='${Status}\n' $pkg 2>/dev/null | grep "install ok installed")
+    if [ "" = "$pkg_ok" ]; then
+        let not_installed++
 
-        if [ "$install" = true ]
-        then
-            $S_LOG -s warn -d $S_NAME -d "$PKG" "Missing needed package "$PKG". Setting up $PKG."
-            
+        if [ "$install" = true ]; then
+            $S_LOG -s warn -d $S_NAME -d "$pkg" "Missing needed package "$pkg". Setting up $pkg."
+
             # https://linuxhint.com/debian_frontend_noninteractive/
             # https://askubuntu.com/a/668859
             # DEBIAN_FRONTEND=noninteractive \
             #     apt-get -qq install \
             #     -o Dpkg::Options::="--force-confnew" \
             #     -o Dpkg::Use-Pty=0 \
-            #     $PKG \
-            #     2> >($S_LOG -s err -d $S_NAME -d "apt-get" -d "$PKG" -i) > >($S_LOG -d $S_NAME -d "apt-get" -d "$PKG" -i)        
-            
+            #     $pkg \
+            #     2> >($S_LOG -s err -d $S_NAME -d "apt-get" -d "$pkg" -i) > >($S_LOG -d $S_NAME -d "apt-get" -d "$pkg" -i)
+
             # https://peteris.rocks/blog/quiet-and-unattended-installation-with-apt-get/
-            DEBIAN_FRONTEND=noninteractive apt-get install -qq $PKG < /dev/null > /dev/null
-            
+            DEBIAN_FRONTEND=noninteractive apt-get install -qq $pkg </dev/null >/dev/null
+
             ERR=$? # store the exit code of the command
 
-            if [ $ERR != "0" ]
-            then
-                $S_LOG -s crit -d $S_NAME -d "$PKG" "Failed to install needed packages ("$PKG"). Please fix it and re-run the script."
+            if [ $ERR != "0" ]; then
+                $S_LOG -s crit -d $S_NAME -d "$pkg" "Failed to install needed packages ("$pkg"). Please fix it and re-run the script."
             else
-                let NOT_INSTALLED--
-                $S_LOG -d $S_NAME -d "$PKG" "Successful install of needed packages ("$PKG")."
+                let not_installed--
+                $S_LOG -d $S_NAME -d "$pkg" "Successful install of needed packages ("$pkg")."
             fi
         fi
     fi
 done
 
-exit $NOT_INSTALLED
+exit $not_installed

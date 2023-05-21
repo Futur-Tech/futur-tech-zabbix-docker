@@ -3,8 +3,7 @@
 declare -a arrayData
 declare -a pathArray
 
-usage()
-{
+usage() {
     echo -e "\nUsage: $0 \
 ([-p <logfile_path>] \
 [-s <alert|crit|err|warn|info|debug>] \
@@ -22,90 +21,84 @@ usage()
 
 while getopts "ip::s::d::" o; do
     case "${o}" in
-        i)
-            acceptStdin=true
+    i)
+        acceptStdin=true
+        ;;
+    p)
+        if [ ! -d "$(dirname "${OPTARG}")" ]; then
+            echo -e "\nft_util_log : Incorrect \$LOG_FILE path (folder missing): \"${pathArray[k]}\"\n" 1>&2
+        else
+            pathArray+=("${OPTARG}")
+        fi
+        ;;
+    s)
+        case ${OPTARG} in
+        alert | \
+            crit | \
+            err | \
+            warn | \
+            info)
+            s=${OPTARG}
             ;;
-        p)
-            if [ ! -d "$(dirname "${OPTARG}")" ] 
-            then
-                echo -e  "\nft_util_log : Incorrect \$LOG_FILE path (folder missing): \"${pathArray[k]}\"\n" 1>&2;
-            else
-                pathArray+=("${OPTARG}")
-            fi
-            ;;
-        s)
-            case ${OPTARG} in
-                alert|\
-                crit|\
-                err|\
-                warn|\
-                info)
-                    s=${OPTARG}
-                    ;;
 
-                debug)
-                    if [ "$LOG_DEBUG" = true ]; then s=${OPTARG}; else exit 0; fi 
-                    ;;
-
-                2[0-5][0-9]|1[0-9][0-9]|[1-9][0-9]|[1-9])
-                    s=err
-                    ;;
-                
-                0)
-                    s=info
-                    ;;
-
-                *)
-                    echo -e  "\nft_util_log : Incorrect severity ${OPTARG}\nAvailable alert|crit|err|warn|info|debug\n" 1>&2;
-                    usage
-                    ;;
-            esac
+        debug)
+            if [ "$LOG_DEBUG" = true ]; then s=${OPTARG}; else exit 0; fi
             ;;
-        d)
-            IFSx=$IFS
-            IFS='|'
-            for arg in $OPTARG
-            do
-                arrayData+=("${arg}")
-            done        
-            IFS=$IFSx
+
+        2[0-5][0-9] | 1[0-9][0-9] | [1-9][0-9] | [1-9])
+            s=err
             ;;
+
+        0)
+            s=info
+            ;;
+
         *)
+            echo -e "\nft_util_log : Incorrect severity ${OPTARG}\nAvailable alert|crit|err|warn|info|debug\n" 1>&2
             usage
             ;;
+        esac
+        ;;
+    d)
+        IFSx=$IFS
+        IFS='|'
+        for arg in $OPTARG; do
+            arrayData+=("${arg}")
+        done
+        IFS=$IFSx
+        ;;
+    *)
+        usage
+        ;;
     esac
     [[ $acceptStdin ]] && break
 done
 
 shift "$((OPTIND - 1))"
 
-echo_log () { 
-    
-    
-    if [ -n "${log_msg}" ]
-    then
+echo_log() {
+
+    if [ -n "${log_msg}" ]; then
         timestamp="$(date +\%Y-\%m-\%d\ \%H:\%M:\%S)"
-        
+
         # Check if terminal support colors
-        if command -v tput >/dev/null
-        then
+        if command -v tput >/dev/null; then
             term_colors=$(tput colors -T $TERM 2>/dev/null)
         else
             term_colors=2
         fi
 
-        # First output to stdout with or formatting formatting 
-        if [ -n "${term_colors}" ] && [ $term_colors -ge 8 ]
-        then
+        # First output to stdout with or formatting formatting
+        if [ -n "${term_colors}" ] && [ $term_colors -ge 8 ]; then
             # Let's put some color
             # https://misc.flogisoft.com/bash/tip_colors_and_formatting
             case ${s} in
-                alert) color="\e[41;93m" ;;
-                crit) color="\e[41m" ;;
-                err) color="\e[91m" ;;
-                warn) color="\e[33m" ;;
-                info) color="\e[94m" ;;
-                debug) color="\e[92m" ;;
+            alert) color="\e[41;93m" ;;
+            crit) color="\e[41m" ;;
+            err) color="\e[91m" ;;
+            warn) color="\e[33m" ;;
+            info) color="\e[94m" ;;
+            debug) color="\e[92m" ;;
             esac
 
             echo -e "${color}${timestamp} ||\e[7m ${s} \e[27m|${data}|\e[0m ${log_msg}"
@@ -114,50 +107,41 @@ echo_log () {
         fi
 
         # Output to file(s)
-        for f in ${pathArray[@]}
-        do
-            echo -e "${timestamp} || ${s} |${data}| ${log_msg}" >> "${f}"
+        for f in ${pathArray[@]}; do
+            echo -e "${timestamp} || ${s} |${data}| ${log_msg}" >>"${f}"
         done
     fi
 }
 
-if [ -z ${s} ]
-then 
+if [ -z ${s} ]; then
     s="info"
 fi
 
-if [[ ${#pathArray[@]} = 0 ]]
-then
-    pathArray=($LOG_FILE) # load the variable in an array
-    for k in ${!pathArray[@]} # check path
-    do 
-        if [ ! -d "$(dirname "${pathArray[k]}")" ] 
-        then
-            echo -e  "\nft_util_log : Incorrect \$LOG_FILE path (folder missing): ${pathArray[k]}\n" 1>&2;
+if [[ ${#pathArray[@]} = 0 ]]; then
+    pathArray=($LOG_FILE)         # load the variable in an array
+    for k in ${!pathArray[@]}; do # check path
+        if [ ! -d "$(dirname "${pathArray[k]}")" ]; then
+            echo -e "\nft_util_log : Incorrect \$LOG_FILE path (folder missing): ${pathArray[k]}\n" 1>&2
             unset pathArray[$k]
         fi
     done
 
-    if [[ ${#pathArray[@]} = 0 ]]  # exit if there are still no path in the array
-    then
-        echo -e "\nft_util_log :  No log file path found." 1>&2; usage;        
+    if [[ ${#pathArray[@]} = 0 ]]; then # exit if there are still no path in the array
+        echo -e "\nft_util_log :  No log file path found." 1>&2
+        usage
     fi
 fi
 
-for i in ${!arrayData[@]}
-do
+for i in ${!arrayData[@]}; do
     data="$data ${arrayData[i]} |"
 done
 
-if [ ! -t 0 ] && [[ $acceptStdin ]] # check if STDIN is open and loop it
-then
-    while read line
-    do
+if [ ! -t 0 ] && [[ $acceptStdin ]]; then # check if STDIN is open and loop it
+    while read line; do
         log_msg="${line}"
         echo_log
     done <&0
-elif [ -n "$*" ] # check if normal argument input
-then
+elif [ -n "$*" ]; then # check if normal argument input
     log_msg="$*"
     echo_log
 fi

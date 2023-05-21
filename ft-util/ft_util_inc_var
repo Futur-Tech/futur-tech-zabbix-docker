@@ -7,11 +7,9 @@ S_CMD="$0"
 S_CMD_DIR=$(readlink -f .)
 
 # Looking for the logger script
-if [ -f "$S_DIR_PATH/ft_util_log" ]
-then 
+if [ -f "$S_DIR_PATH/ft_util_log" ]; then
     S_LOG="$S_DIR_PATH/ft_util_log"
-elif [ -f "$S_DIR_PATH/ft-util/ft_util_log" ]
-then
+elif [ -f "$S_DIR_PATH/ft-util/ft_util_log" ]; then
     S_LOG="$S_DIR_PATH/ft-util/ft_util_log"
 else
     echo "!!!!!!!!!!!!!!!! CRITICAL ERROR !!!!!!!!!!!!!!!! FT_UTIL_LOG NOT FOUND !!!!!!!!!!!!!!!!"
@@ -19,13 +17,11 @@ else
 fi
 
 # Looking for the log file.... if not define then setup a default one
-if [ -z "$LOG_FILE" ]
-then 
+if [ -z ${LOG_FILE+x} ]; then
     export LOG_FILE="$S_DIR_PATH/$S_DIR_NAME-${S_NAME%.*}.log"
 fi
 
 # Looking for debug var...
-if [ -z "$LOG_DEBUG" ]
-then 
+if [ -z ${LOG_DEBUG+x} ]; then
     export LOG_DEBUG=false
 fi
