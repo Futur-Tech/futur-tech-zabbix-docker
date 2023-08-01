@@ -18,13 +18,8 @@ shift "$((OPTIND - 1))"
 pkg_arr=("$@")
 
 if [ "$update" = true ]; then
-    $S_LOG -d $S_NAME "Package list update"
-    apt update &>/dev/null
-    if [ $? != "0" ]; then
-        $S_LOG -s crit -d $S_NAME "Error while getting package list update."
-    else
-        $S_LOG -d $S_NAME "Successful package list update."
-    fi
+    apt-get update -qq
+    $S_LOG -s $? -d $S_NAME "Package list update returned exit_code=$?"
 fi
 
 # This var will increment for each pkg not found BUT will decrement if the package is successfully installed
@@ -50,9 +45,7 @@ for pkg in "${pkg_arr[@]}"; do
             # https://peteris.rocks/blog/quiet-and-unattended-installation-with-apt-get/
             DEBIAN_FRONTEND=noninteractive apt-get install -qq $pkg </dev/null >/dev/null
 
-            ERR=$? # store the exit code of the command
-
-            if [ $ERR != "0" ]; then
+            if [ $? != "0" ]; then
                 $S_LOG -s crit -d $S_NAME -d "$pkg" "Failed to install needed packages ("$pkg"). Please fix it and re-run the script."
             else
                 let not_installed--
