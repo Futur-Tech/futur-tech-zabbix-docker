@@ -13,7 +13,7 @@ containers=$(docker ps --format "{{.Image}}")
 # Loop through each image and check for updates
 for image in $containers; do
     # Pull the latest version of the image
-    run_cmd_log_noexit docker image pull $image
+    run_cmd_nolog_noexit docker image pull $image
 
     # Compare the image ID of the running container with the latest image ID
     running_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image")
