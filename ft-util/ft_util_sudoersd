@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Function to reset specific sudoers configuration
+# Usage: sudoersd_reset_file filename user
+sudoersd_reset_file() {
+    local filename="$1"
+    local user="$2"
+
+    if [[ -z "$filename" || -z "$user" ]]; then
+        $S_LOG -s err -d $S_NAME "Error: Required variables are not provided."
+        exit 1
+    fi
+
+    echo "Defaults:${user} !requiretty" | sudo EDITOR='tee' visudo --file="/etc/sudoers.d/${filename}" &>/dev/null
+}
+export -f sudoersd_reset_file
+
+# Function to add specific sudoers entries
+# Usage: sudoersd_addto_file filename user cmd [host] [userrunas] [option]
+sudoersd_addto_file() {
+    local filename="$1"
+    local user="$2"
+    local cmd="$3"
+    local host="${4:-ALL}"
+    local userrunas="${5:-root}"
+    local option="${6:-NOPASSWD}"
+
+    if [[ -z "$filename" || -z "$user" || -z "$cmd" ]]; then
+        $S_LOG -s err -d $S_NAME "Error: Required variables are not provided."
+        exit 1
+    fi
+
+    echo "${user} ${host}=(${userrunas}) ${option}:${cmd}" | sudo EDITOR='tee -a' visudo --file="/etc/sudoers.d/${filename}" &>/dev/null
+}
+export -f sudoersd_addto_file

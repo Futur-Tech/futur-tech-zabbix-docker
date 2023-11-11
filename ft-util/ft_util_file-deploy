@@ -1,0 +1,103 @@
+#!/bin/bash
+
+source "$(dirname "$0"})/ft_util_inc_var"
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    $S_LOG -s crit -d $S_NAME "Needed variable path_src and path_tgt are missing. Cannot do file deploy! path_src=$1 path_tgt=$2 file_deploy_opts=$3"
+    exit 1
+fi
+
+#############################
+## Functions
+#############################
+
+function backup_file() {
+    if [ -f "$*.${bkp_suffix}" ]; then
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Backup skipped of $* > $*.${bkp_suffix}"
+    elif [ ! -f "$*" ]; then
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Backup skipped of $* (new file)"
+    else
+        cp "$*" "$*.${bkp_suffix}"
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Backup done of $* > $*.${bkp_suffix}"
+    fi
+}
+export -f backup_file
+
+function compare_file() {
+    if [ -f "$1" ]; then
+        diff --unified=0 "$1" "$2"
+    else
+        echo "no diff on new file: ${2}"
+    fi
+}
+export -f compare_file
+
+#############################
+## Variables
+#############################
+
+path_src=$1
+path_src_nice="${path_src/#$(dirname "${S_DIR_PATH}")\//}" # this will shorten the path_src string in order to create less text in logs (note, it will only shorten if the path is in the same ../ dir as this script)
+path_tgt=$2
+
+# Grab options
+if [[ "${3}" == *"NO-BACKUP"* ]]; then opt_backup=false; else opt_backup=true; fi
+if [[ "${3}" == *"NO-COMPARE"* ]]; then opt_compare=false; else opt_compare=true; fi
+
+# Backup suffix is the start date of the parent PID... which is gonna be the same if you use this script several time, hence you can do compare...
+# Exemple: in a script you deploy the folder bin then a file 123.sh inside of bin... on the next run 123.sh will be deleted when you redeploy bin files... but will be redeployed AND compared because the backup prefix will be the same
+ppid_age_date=$(ps -olstart= $PPID)              # Get start date of parent PID
+ppid_age_epoch=$(date +%s -d "${ppid_age_date}") # Convert start date to epoch date
+bkp_suffix=$(date +"%Y%m%d-%H%M%S" -d@${ppid_age_epoch}).bak
+$S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "bkp_suffix=${bkp_suffix}"
+
+#############################
+## Deploy file(s)
+#############################
+
+returncode=255
+if [ -d "${path_tgt}" ]; then
+
+    # Backup files
+    if [ "$opt_backup" = true ]; then
+        find "${path_tgt%/}/" -type f ! -name '*.bak' | while read file; do backup_file "${file}"; done
+    fi
+
+    # Delete all the files inside the destination dir (excluding bak)
+    find "${path_tgt%/}/" -type f ! -name '*.bak' -delete 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
+    returncode=$?
+    $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Delete existing files returned EXIT_CODE=$returncode"
+
+    # Copy dir
+    cp -R "${path_src%/}/." "${path_tgt%/}/" 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
+    returncode=$?
+
+    # Compare
+    if [ "$opt_backup" = true ]; then
+        if [ "$opt_compare" = true ]; then
+            find "${path_src%/}/" -type f ! -name '*.bak' -exec bash -c "p=\"{}\" ; p=\"${path_tgt%/}\${p#${path_src%/}}\" ; compare_file \"\${p}.${bkp_suffix}\" \"\${p}\"" \; | $S_LOG -s warn -d "${S_NAME}|${path_src_nice}|diff" -i
+        fi
+        $S_DIR_PATH/ft_util_bak-cleaner "${path_tgt%/}/" # Cleanup backup files
+    fi
+
+else
+    if [ "$opt_backup" = true ]; then backup_file ${path_tgt}; fi # Backup file
+
+    # Create dir if missing
+    path_tgt_d=$(dirname "${path_tgt}")
+    [ -d "${path_tgt_d}" ] || mkdir -p "${path_tgt_d}"
+
+    # Copy file
+    cp -p "${path_src}" "${path_tgt}" 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
+    returncode=$? # store the exit code of the command
+
+    # Compare
+    if [ "$opt_backup" = true ]; then
+        if [ "$opt_compare" = true ]; then
+            compare_file "${path_tgt}.${bkp_suffix}" "${path_tgt}" | $S_LOG -s warn -d "${S_NAME}|${path_src_nice}|diff" -i
+        fi
+        $S_DIR_PATH/ft_util_bak-cleaner "${path_tgt}" # Cleanup backup files
+    fi
+
+fi
+$S_LOG -s $returncode -d "${S_NAME}|${path_src_nice}" "Transfer returned EXIT_CODE=$returncode"

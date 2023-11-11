@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# Check if a user exists
+user_exists() {
+    id "$1" &>/dev/null
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -s debug -d "$S_NAME" "User [${1}] does exist.."
+    else
+        $S_LOG -s crit -d "$S_NAME" "User [${1}] does not exist."
+        return $exit_code
+    fi
+}
+export -f user_exists
+
+# Check if a group exists
+group_exists() {
+    getent group "$1" &>/dev/null
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -s debug -d "$S_NAME" "Group [${1}] does exist.."
+    else
+        $S_LOG -s crit -d "$S_NAME" "Group [${1}] does not exist."
+        return $exit_code
+    fi
+}
+export -f group_exists
+
+# Apply ownership to a path
+enforce_ownership() {
+    if [ $# -lt 2 ]; then
+        $S_LOG -s err -d "$S_NAME" "Usage: enforce_ownership <path> <group> [user=root]"
+        return 1
+    fi
+
+    local path="$1"
+    local group="${2}"
+    local user="${3:-root}" # Default user is root if not provided
+
+    if [ -d "$path" ]; then
+        run_cmd_log find "$path" -exec chown "$user:$group" {} +
+    else
+        run_cmd_log find "${path%/*}" -name "${path##*/}*" -exec chown "$user:$group" {} +
+    fi
+}
+export -f enforce_ownership
+
+# Apply permissions to a path (file or directory)
+enforce_permissions() {
+    local operation="$1"
+    local path="$2"
+
+    if [ "$operation" == "conf" ]; then
+        if [ -d "$path" ]; then
+            run_cmd_log find "$path" -type d -exec chmod 750 {} +
+            run_cmd_log find "$path" -type f -exec chmod 640 {} +
+        else
+            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type d -exec chmod 750 {} +
+            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type f -exec chmod 640 {} +
+        fi
+    elif [ "$operation" == "exec" ]; then
+        if [ -d "$path" ]; then
+            run_cmd_log find "$path" -exec chmod 750 {} +
+        else
+            run_cmd_log find "${path%/*}" -name "${path##*/}*" -exec chmod 750 {} +
+        fi
+    elif [ "$operation" == "secret" ]; then
+        if [ -d "$path" ]; then
+            run_cmd_log find "$path" -type d -exec chmod 700 {} +
+            run_cmd_log find "$path" -type f -exec chmod 600 {} +
+        else
+            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type d -exec chmod 700 {} +
+            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type f -exec chmod 600 {} +
+        fi
+    else
+        $S_LOG -s err -d "$S_NAME" "Invalid operation: $operation"
+        return 1
+    fi
+}
+export -f enforce_permissions
+
+# Apply security settings to a path (file or directory)
+enforce_security() {
+    local operation="$1"
+    local path="$2"
+    local group="${3:-root}" # Default group is root if not provided
+    local user="${4:-root}"  # Default user is root if not provided
+
+    enforce_ownership "$path" "$group" "$user"
+    enforce_permissions "$operation" "$path"
+}
+export -f enforce_security
