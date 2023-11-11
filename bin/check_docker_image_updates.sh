@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export LOG_FILE="/var/log/futur-tech-zabbix-docker_image_updates.log"
+source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_func
 source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_var
 
 # Initialize a counter for images with updates
@@ -12,7 +13,7 @@ containers=$(docker ps --format "{{.Image}}")
 # Loop through each image and check for updates
 for image in $containers; do
     # Pull the latest version of the image
-    docker image pull $image | $S_LOG -d $S_NAME -d "$image" -i
+    run_cmd_log_noexit docker image pull $image
 
     # Compare the image ID of the running container with the latest image ID
     running_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image")

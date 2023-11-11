@@ -31,6 +31,7 @@ mkdir_if_missing "${bin_dir}"
 $S_DIR/ft-util/ft_util_file-deploy "$S_DIR/bin/" "${bin_dir}"
 $S_DIR/ft-util/ft_util_file-deploy "$S_DIR/ft-util/ft_util_log" "${bin_dir}/ft_util_log"
 $S_DIR/ft-util/ft_util_file-deploy "$S_DIR/ft-util/ft_util_inc_var" "${bin_dir}/ft_util_inc_var"
+$S_DIR/ft-util/ft_util_file-deploy "$S_DIR/ft-util/ft_util_inc_func" "${bin_dir}/ft_util_inc_func"
 $S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.zabbix/${app_name}.conf" "${zbx_conf_agent_d}/${app_name}.conf"
 enforce_security exec "$bin_dir" zabbix
 
