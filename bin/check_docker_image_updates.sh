@@ -7,16 +7,18 @@ source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_var
 # Initialize a counter for images with updates
 update_count=0
 
-# List all running Docker containers and get their image names
-containers=$(docker ps --format "{{.Image}}")
+# List all running Docker containers and get their container IDs
+containers=$(docker ps -q)
 
-# Loop through each image and check for updates
-for image in $containers; do
+# Loop through each container and check for updates on its image
+for container in $containers; do
+    image=$(docker inspect --format='{{.Config.Image}}' $container)
+
     # Pull the latest version of the image
     run_cmd_nolog_noexit docker image pull $image
 
     # Compare the image ID of the running container with the latest image ID
-    running_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image")
+    running_image_id=$(docker inspect --format='{{.Image}}' $container)
     latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image" | head -n 1)
 
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$running_image_id is running_image_id"
