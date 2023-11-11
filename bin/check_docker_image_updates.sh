@@ -14,11 +14,14 @@ for image in $containers; do
     $S_LOG -s debug -d "$S_NAME" "Checking updates for $image..."
 
     # Pull the latest version of the image
-    docker pull $image | $S_LOG -s $? -d $S_NAME -d "$image" -i
+    docker pull $image | $S_LOG -s debug -d $S_NAME -d "$image" -i
 
     # Compare the image ID of the running container with the latest image ID
     running_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image")
     latest_image_id=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "$image" | head -n 1)
+
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$running_image_id is running_image_id"
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
 
     if [ "$running_image_id" != "$latest_image_id" ]; then
         $S_LOG -s warn -d "$S_NAME" "A newer version of $image is available."
