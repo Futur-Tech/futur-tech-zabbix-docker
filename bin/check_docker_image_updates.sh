@@ -11,10 +11,8 @@ containers=$(docker ps --format "{{.Image}}")
 
 # Loop through each image and check for updates
 for image in $containers; do
-    $S_LOG -s debug -d "$S_NAME" "Checking updates for $image..."
-
     # Pull the latest version of the image
-    docker image pull $image --quiet | $S_LOG -s debug -d $S_NAME -d "$image" -i
+    docker image pull $image | $S_LOG -d $S_NAME -d "$image" -i
 
     # Compare the image ID of the running container with the latest image ID
     running_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image")
