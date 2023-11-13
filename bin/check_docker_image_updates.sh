@@ -19,6 +19,7 @@ for container in $containers; do
 
     # Get the ID of the running image
     running_image_id=$(docker inspect --format='{{.Image}}' $container)
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$running_image_id is running_image_id"
 
     # Check if the running image ID is empty
     if [ -z "$running_image_id" ]; then
@@ -29,15 +30,13 @@ for container in $containers; do
     # Use docker image inspect to find the name of the latest image
     latest_image=$(docker image inspect $running_image_id --format='{{.RepoTags}}')
     latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image" | head -n 1)
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
 
     # Check if the latest image ID is empty
     if [ -z "$latest_image_id" ]; then
         $S_LOG -s err -d "$S_NAME" "Latest image ID for image $image is empty."
         continue
     fi
-
-    $S_LOG -s debug -d "$S_NAME" -d "$image" "$running_image_id is running_image_id"
-    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
 
     if [ "$running_image_id" != "$latest_image_id" ]; then
         $S_LOG -s warn -d "$S_NAME" "A newer version of $image is available."
