@@ -61,4 +61,4 @@ else
     $S_LOG -s warn -d "$S_NAME" "Image(s) have newer versions available."
 fi
 
-$S_LOG -d "$S_NAME" "Image(s) newer versions available: $update_count"
+$S_LOG -d "$S_NAME" "Image(s) newer versions available: [${update_count}]"
