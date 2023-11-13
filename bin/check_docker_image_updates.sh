@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Script to Check for Docker Image Updates
+# -----------------------------------------
+# This script checks all running Docker containers on the host and determines
+# if there are newer image versions available in the Docker registry.
+# It pulls the latest images, compares them with the running containers' images,
+# and logs the results.
+#
+# Outputs:
+# - Logs the status of each image (updated or newer version available)
+# - Logs any errors encountered during the process
+# - Provides a count of images that have newer versions available
+#
+# Log File:
+# - The results are logged in '/var/log/futur-tech-zabbix-docker_image_updates.log'
+
 export LOG_FILE="/var/log/futur-tech-zabbix-docker_image_updates.log"
 source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_func
 source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_var
