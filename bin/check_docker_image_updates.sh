@@ -37,8 +37,8 @@ for container in $containers; do
     latest_image_name=$(echo $repo_digests | cut -d'@' -f1)
     latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image_name" --no-trunc | head -n 1)
 
-    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_name is latest_image_name"
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_name is latest_image_name"
 
     # Check if the latest image ID is empty
     if [ -z "$latest_image_id" ]; then
