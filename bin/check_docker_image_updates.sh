@@ -34,11 +34,11 @@ for container in $containers; do
     # Use docker image inspect to get the RepoDigests
     repo_digests=$(docker image inspect $running_image_id --format='{{index .RepoDigests 0}}')
     # Extract the repository name from the RepoDigest
-    latest_image_name=$(echo $repo_digests | cut -d'@' -f1)
-    latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image_name" --no-trunc | head -n 1)
+    image_name=$(echo $repo_digests | cut -d'@' -f1)
+    latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$image_name" --no-trunc | head -n 1)
 
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
-    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_name is latest_image_name"
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$image_name is image_name"
 
     # Check if the latest image ID is empty
     if [ -z "$latest_image_id" ]; then
@@ -47,7 +47,7 @@ for container in $containers; do
     fi
 
     if [ "$running_image_id" == "$latest_image_id" ]; then
-        $S_LOG -s info -d "$S_NAME" "Image $image is up-to-date."
+        $S_LOG -s info -d "$S_NAME" "$image is up-to-date."
     elif [ "$running_image_id" != "$latest_image_id" ]; then
         $S_LOG -s warn -d "$S_NAME" "A newer version of $image is available."
         update_count=$((update_count + 1))
@@ -58,5 +58,7 @@ done
 if [ $update_count -eq 0 ]; then
     $S_LOG -d "$S_NAME" "All images are up-to-date."
 else
-    $S_LOG -s warn -d "$S_NAME" "$update_count image(s) have newer versions available."
+    $S_LOG -s warn -d "$S_NAME" "Image(s) have newer versions available."
 fi
+
+$S_LOG -d "$S_NAME" "Image(s) newer versions available: $update_count"
