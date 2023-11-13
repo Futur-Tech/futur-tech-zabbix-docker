@@ -42,23 +42,16 @@ for container in $containers; do
 
     # Check if the latest image ID is empty
     if [ -z "$latest_image_id" ]; then
-        $S_LOG -s err -d "$S_NAME" "Latest image ID for image $image is empty."
+        $S_LOG -s err -d "$S_NAME" "$image latest image ID for image is empty."
         continue
     fi
 
     if [ "$running_image_id" == "$latest_image_id" ]; then
         $S_LOG -s info -d "$S_NAME" "$image is up-to-date."
     elif [ "$running_image_id" != "$latest_image_id" ]; then
-        $S_LOG -s warn -d "$S_NAME" "A newer version of $image is available."
+        $S_LOG -s warn -d "$S_NAME" "$image has a newer version available."
         update_count=$((update_count + 1))
     fi
 done
 
-# Display summary message
-if [ $update_count -eq 0 ]; then
-    $S_LOG -d "$S_NAME" "All images are up-to-date."
-else
-    $S_LOG -s warn -d "$S_NAME" "Image(s) have newer versions available."
-fi
-
-$S_LOG -d "$S_NAME" "Image(s) newer versions available: [${update_count}]"
+$S_LOG -d "$S_NAME" "Images with newer versions available: [${update_count}]"
