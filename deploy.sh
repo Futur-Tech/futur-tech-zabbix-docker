@@ -48,6 +48,12 @@ else
 fi
 
 echo "
+  SETUP SCHEDULED TASK
+------------------------------------------"
+
+$S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.cron.d/${app_name}" "/etc/cron.d/${app_name}"
+
+echo "
   SETUP SUDOERS FILE
 ------------------------------------------"
 
