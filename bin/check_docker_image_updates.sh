@@ -15,7 +15,7 @@ for container in $containers; do
     image=$(docker inspect --format='{{.Config.Image}}' $container)
 
     # Pull the latest version of the image
-    run_cmd_nolog_noexit docker image pull $image
+    docker image pull $image | $S_LOG -d "$S_NAME" -d "$image" -i
 
     # Get the ID of the running image
     running_image_id=$(docker inspect --format='{{.Image}}' $container)
