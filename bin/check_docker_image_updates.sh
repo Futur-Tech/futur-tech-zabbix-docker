@@ -28,8 +28,9 @@ for container in $containers; do
     fi
 
     # Use docker image inspect to find the name of the latest image
-    latest_image=$(docker image inspect $running_image_id --format='{{.RepoTags}}')
-    latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image" | head -n 1)
+    latest_image_name=$(docker image inspect $running_image_id --format='{{.RepoTags}}')
+    latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image_name" | head -n 1)
+    $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_name is latest_image_name"
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
 
     # Check if the latest image ID is empty
