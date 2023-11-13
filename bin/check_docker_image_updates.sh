@@ -19,6 +19,7 @@ for container in $containers; do
 
     # Get the ID of the running image
     running_image_id=$(docker inspect --format='{{.Image}}' $container)
+
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$running_image_id is running_image_id"
 
     # Check if the running image ID is empty
@@ -27,10 +28,12 @@ for container in $containers; do
         continue
     fi
 
-    # Use docker image inspect to find the name of the latest image
-    # Extract the first tag from the RepoTags array and then split to get only the repository name
-    latest_image_name=$(docker image inspect $running_image_id --format='{{index .RepoTags 0}}' | cut -d':' -f1)
+    # Use docker image inspect to get the RepoDigests
+    repo_digests=$(docker image inspect $running_image_id --format='{{index .RepoDigests 0}}')
+    # Extract the repository name from the RepoDigest
+    latest_image_name=$(echo $repo_digests | cut -d'@' -f1)
     latest_image_id=$(docker images --format "{{.ID}}" --filter=reference="$latest_image_name" --no-trunc | head -n 1)
+
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_name is latest_image_name"
     $S_LOG -s debug -d "$S_NAME" -d "$image" "$latest_image_id is latest_image_id"
 
