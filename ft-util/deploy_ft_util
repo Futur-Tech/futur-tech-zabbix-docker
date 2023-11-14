@@ -14,10 +14,14 @@ function download_file {
 rm ${FT_UTIL_DIR}/ft_util_*
 echo "rm ${FT_UTIL_REPO}/ft_util_* done"
 
+download_file ft_util_bak-cleaner
+download_file ft_util_file-deploy
+download_file ft_util_inc_func
 download_file ft_util_inc_var
 download_file ft_util_log
 download_file ft_util_pkg
-
+download_file ft_util_sudoersd
+download_file ft_util_usrmgmt
 download_file README.md
 
 chmod +x ${FT_UTIL_DIR}/ft_util_*

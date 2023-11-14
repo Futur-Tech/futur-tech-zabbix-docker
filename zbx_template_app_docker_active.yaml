@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2023-08-02T14:44:30Z'
+  date: '2023-11-14T11:07:25Z'
   groups:
     - uuid: 7f27dc73981940769811e7fae4a26772
       name: Templates/Futur-Tech/Applications
@@ -20,7 +20,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.architecture
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -40,7 +39,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.cgroup_driver
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -70,7 +68,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.containers.paused
           delay: '0'
-          history: 7d
           description: 'Total number of containers paused on this host.'
           preprocessing:
             - type: JSONPATH
@@ -86,7 +83,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.containers.running
           delay: '0'
-          history: 7d
           description: 'Total number of containers running on this host.'
           preprocessing:
             - type: JSONPATH
@@ -102,7 +98,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.containers.stopped
           delay: '0'
-          history: 7d
           description: 'Total number of containers stopped on this host.'
           preprocessing:
             - type: JSONPATH
@@ -118,7 +113,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.containers.total
           delay: '0'
-          history: 7d
           description: 'Total number of containers on this host.'
           preprocessing:
             - type: JSONPATH
@@ -134,7 +128,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.containers_size
           delay: '0'
-          history: 7d
           units: B
           preprocessing:
             - type: JSONPATH
@@ -152,7 +145,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.cpu_cfs_period.enabled
           delay: '0'
-          history: 7d
           description: 'https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler'
           valuemap:
             name: 'Docker flag'
@@ -176,7 +168,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.cpu_cfs_quota.enabled
           delay: '0'
-          history: 7d
           description: 'https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler'
           valuemap:
             name: 'Docker flag'
@@ -200,7 +191,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.cpu_set.enabled
           delay: '0'
-          history: 7d
           description: 'https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler'
           valuemap:
             name: 'Docker flag'
@@ -224,7 +214,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.cpu_shares.enabled
           delay: '0'
-          history: 7d
           description: 'https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler'
           valuemap:
             name: 'Docker flag'
@@ -258,7 +247,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.debug.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -281,7 +269,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.default_runtime
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -301,7 +288,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.driver
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           description: |
@@ -324,7 +310,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.goroutines
           delay: '0'
-          history: 7d
           description: 'Number of goroutines.'
           preprocessing:
             - type: JSONPATH
@@ -345,12 +330,54 @@ zabbix_export:
           tags:
             - tag: component
               value: raw
+        - uuid: 7edcdddfe44f4c93afc443f1f6b3a86a
+          name: 'Docker: Image updates count'
+          type: ZABBIX_ACTIVE
+          key: docker.images.check_updates.count
+          delay: 5m
+          units: 'new image(s)'
+          description: 'Number of running images with newer versions pulled automatically by Futur-Tech-Zabbix-Docker script'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: images
+          triggers:
+            - uuid: de0c567cd5ce47fb9fdf8a050c1fa867
+              expression: 'last(/Futur-Tech App Docker Active Agent/docker.images.check_updates.count)>0'
+              name: 'Docker images have newer versions available'
+              opdata: '{ITEM.LASTVALUE}'
+              priority: WARNING
+        - uuid: 2d900a0aec76463a9767d7a1aa9fa506
+          name: 'Docker: Image updates date'
+          type: ZABBIX_ACTIVE
+          key: docker.images.check_updates.last
+          delay: 5m
+          units: unixtime
+          description: 'Last check date for running images with newer versions by Futur-Tech-Zabbix-Docker script'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: images
+          triggers:
+            - uuid: efc713f9f0a64f45934f0ccfb7446f18
+              expression: |
+                now()-last(/Futur-Tech App Docker Active Agent/docker.images.check_updates.last)>7d 
+                or nodata(/Futur-Tech App Docker Active Agent/docker.images.check_updates.last,7d)=1
+              name: 'Docker images update check is not running'
+              opdata: 'Last run: {ITEM.LASTVALUE}'
+              priority: AVERAGE
+              description: 'Make sure cron is setup to run /usr/local/bin/futur-tech-zabbix-docker/check_docker_image_updates.sh daily.'
         - uuid: ab4a4d92e4c04ff685b687cf14414b06
           name: 'Docker: Images available'
           type: DEPENDENT
           key: docker.images.top_level
           delay: '0'
-          history: 7d
           description: 'Number of top-level images.'
           preprocessing:
             - type: JSONPATH
@@ -366,7 +393,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.images.total
           delay: '0'
-          history: 7d
           description: 'Number of images with intermediate image layers.'
           preprocessing:
             - type: JSONPATH
@@ -382,7 +408,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.images_size
           delay: '0'
-          history: 7d
           units: B
           preprocessing:
             - type: JSONPATH
@@ -410,7 +435,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.ipv4_forwarding.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -433,7 +457,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.kernel_mem.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -456,7 +479,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.kernel_mem_tcp.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -479,7 +501,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.kernel_version
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -499,7 +520,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.layers_size
           delay: '0'
-          history: 7d
           units: B
           preprocessing:
             - type: JSONPATH
@@ -515,7 +535,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.live_restore.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -538,7 +557,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.logging_driver
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -558,7 +576,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.mem.total
           delay: '0'
-          history: 7d
           units: B
           preprocessing:
             - type: JSONPATH
@@ -574,7 +591,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.mem_limit.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -597,7 +613,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.name
           delay: '0'
-          history: 1h
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -628,7 +643,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.ncpu
           delay: '0'
-          history: 7d
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -643,7 +657,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.nevents_listener
           delay: '0'
-          history: 7d
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -658,7 +671,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.nfd
           delay: '0'
-          history: 7d
           description: 'Number of used File Descriptors.'
           preprocessing:
             - type: JSONPATH
@@ -674,7 +686,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.oomkill.disabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -697,7 +708,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.operating_system
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -717,7 +727,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.os_type
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -737,7 +746,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.pids_limit.enabled
           delay: '0'
-          history: 7d
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -757,7 +765,6 @@ zabbix_export:
           name: 'Docker: Ping'
           type: ZABBIX_ACTIVE
           key: docker.ping
-          history: 7h
           valuemap:
             name: 'Service state'
           preprocessing:
@@ -783,7 +790,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.root_dir
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -803,7 +809,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.server_version
           delay: '0'
-          history: 7d
           trends: '0'
           value_type: CHAR
           preprocessing:
@@ -834,7 +839,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.swap_limit.enabled
           delay: '0'
-          history: 7d
           valuemap:
             name: 'Docker flag'
           preprocessing:
@@ -859,7 +863,6 @@ zabbix_export:
           type: DEPENDENT
           key: docker.volumes_size
           delay: '0'
-          history: 7d
           units: B
           preprocessing:
             - type: JSONPATH
@@ -898,7 +901,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.created["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: unixtime
               valuemap:
                 name: 'Docker date format'
@@ -923,7 +925,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.finished["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: unixtime
               description: 'Time at which the container last terminated.'
@@ -950,7 +951,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.image["{#NAME}"]'
               delay: '0'
-              history: 7d
               trends: '0'
               value_type: CHAR
               preprocessing:
@@ -972,7 +972,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.restart_count["{#NAME}"]'
               delay: '0'
-              history: 7d
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -989,7 +988,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.started["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: unixtime
               valuemap:
@@ -1015,7 +1013,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.dead["{#NAME}"]'
               delay: '0'
-              history: 7d
               valuemap:
                 name: 'Docker flag'
               preprocessing:
@@ -1037,7 +1034,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.error["{#NAME}"]'
               delay: '0'
-              history: 7d
               trends: '0'
               value_type: CHAR
               preprocessing:
@@ -1070,7 +1066,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.exitcode["{#NAME}"]'
               delay: '0'
-              history: 7d
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -1090,7 +1085,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.health.failing["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1112,7 +1106,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.health["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               description: 'Container''s `HEALTHCHECK`.'
               valuemap:
@@ -1154,7 +1147,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.oomkilled["{#NAME}"]'
               delay: '0'
-              history: 7d
               valuemap:
                 name: 'Docker flag'
               preprocessing:
@@ -1176,7 +1168,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.paused["{#NAME}"]'
               delay: '0'
-              history: 7d
               valuemap:
                 name: 'Docker flag'
               preprocessing:
@@ -1198,7 +1189,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.pid["{#NAME}"]'
               delay: '0'
-              history: 7d
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -1218,7 +1208,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.restarting["{#NAME}"]'
               delay: '0'
-              history: 7d
               valuemap:
                 name: 'Docker flag'
               preprocessing:
@@ -1240,7 +1229,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.running["{#NAME}"]'
               delay: '0'
-              history: 7d
               valuemap:
                 name: 'Docker flag'
               preprocessing:
@@ -1262,7 +1250,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_info.state.status["{#NAME}"]'
               delay: '0'
-              history: 7d
               trends: '0'
               value_type: CHAR
               preprocessing:
@@ -1297,7 +1284,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_pct_usage["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: '%'
               preprocessing:
@@ -1316,7 +1302,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.kernel.rate["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: s
               preprocessing:
@@ -1341,7 +1326,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.throttled_periods["{#NAME}"]'
               delay: '0'
-              history: 7d
               description: 'Number of periods when the container hits its throttling limit.'
               preprocessing:
                 - type: JSONPATH
@@ -1359,7 +1343,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.throttled_time["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: s
               description: 'Aggregate time the container was throttled for in nanoseconds.'
@@ -1382,7 +1365,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.throttling_periods["{#NAME}"]'
               delay: '0'
-              history: 7d
               description: 'Number of periods with throttling active.'
               preprocessing:
                 - type: JSONPATH
@@ -1400,7 +1382,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.total.rate["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: s
               preprocessing:
@@ -1425,7 +1406,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.cpu_usage.user.rate["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: s
               preprocessing:
@@ -1450,7 +1430,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.memory.commit_bytes["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH
@@ -1468,7 +1447,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.memory.commit_peak_bytes["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH
@@ -1486,7 +1464,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.memory.max_usage["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH
@@ -1504,7 +1481,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.memory.private_working_set["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH
@@ -1522,7 +1498,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.memory.usage["{#NAME}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH
@@ -1540,7 +1515,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.online_cpus["{#NAME}"]'
               delay: '0'
-              history: 7d
               preprocessing:
                 - type: JSONPATH
                   parameters:
@@ -1557,7 +1531,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.container_stats.pids_stats.current["{#NAME}"]'
               delay: '0'
-              history: 7d
               description: 'Current number of PIDs the container has created.'
               preprocessing:
                 - type: JSONPATH
@@ -1588,7 +1561,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.rx_bytes["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: B
               preprocessing:
@@ -1612,7 +1584,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.rx_dropped["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1635,7 +1606,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.rx_errors["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1658,7 +1628,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.rx_packets["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1681,7 +1650,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.tx_bytes["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               units: B
               preprocessing:
@@ -1705,7 +1673,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.tx_dropped["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1728,7 +1695,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.tx_errors["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1751,7 +1717,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.networks.tx_packets["{#NAME}"]'
               delay: '0'
-              history: 7d
               value_type: FLOAT
               preprocessing:
                 - type: JSONPATH
@@ -1889,7 +1854,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.image.created["{#ID}"]'
               delay: '0'
-              history: 7d
               units: unixtime
               preprocessing:
                 - type: JSONPATH
@@ -1910,7 +1874,6 @@ zabbix_export:
               type: DEPENDENT
               key: 'docker.image.size["{#ID}"]'
               delay: '0'
-              history: 7d
               units: B
               preprocessing:
                 - type: JSONPATH

@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+# deploy_git git_name git@github.com:Futur-Tech/git_name.git "args1 args2 args3" "deploy-again"
+function deploy_git() {
+    if [ -d "/usr/local/src/${1}" ] && [ "${4}" = "deploy-again" ]; then
+        $S_LOG -d "$S_NAME" -d "${1}" "Git Repo ${1} already cloned. Now deploying again..."
+
+        echo
+        echo "[${1}/deploy.sh]"
+        echo "    |"
+        /usr/local/src/${1}/deploy.sh ${3} 1> >(sed "s/^/    |__ /") 2> >(sed "s/^/    |__ /" >&2)
+        echo
+
+        $S_LOG -d "$S_NAME" -d "${1}" "Git Repo ${1} deployed again"
+
+    elif [ -d "/usr/local/src/${1}" ]; then
+        $S_LOG -d "$S_NAME" -d "${1}" "Git Repo ${1} already cloned"
+
+    else
+        cd /usr/local/src
+        git clone ${2}
+        $S_LOG -d "$S_NAME" -d "${1}" "Git Repo ${1} cloned. Now deploying..."
+
+        echo
+        echo "[${1}/deploy.sh]"
+        echo "    |"
+        /usr/local/src/${1}/deploy.sh ${3} 1> >(sed "s/^/    |__ /") 2> >(sed "s/^/    |__ /" >&2)
+        echo
+
+        $S_LOG -d "$S_NAME" -d "${1}" "Git Repo ${1} deployed"
+    fi
+}
+export -f deploy_git
+
+# Run command, output simple log and result
+# Exit if failed
+function run_cmd_log() {
+    $@ 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
+    local exit_code=${PIPESTATUS[0]}
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -d "$S_NAME" "[${*}] successful"
+    else
+        $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"
+        exit $exit_code
+    fi
+}
+export -f run_cmd_log
+
+# Run command, no log and result
+# Exit if failed
+function run_cmd_nolog() {
+    $@ &>/dev/null
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -d "$S_NAME" "[${*}] successful"
+    else
+        $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"
+        exit $exit_code
+    fi
+}
+export -f run_cmd_nolog
+
+# Run command, no log and result output only if fail
+# Exit if failed
+function run_cmd_silent() {
+    $@ &>/dev/null
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -s debug -d "$S_NAME" "[${*}] successful"
+    else
+        $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"
+        exit $exit_code
+    fi
+}
+export -f run_cmd_silent
+
+# Run command, output simple log and result
+# Continue if failed
+function run_cmd_log_noexit() {
+    $@ 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
+    local exit_code=${PIPESTATUS[0]}
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -d "$S_NAME" "[${*}] successful"
+    else $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
+}
+export -f run_cmd_log_noexit
+
+# Run command, no log and result
+# Continue if failed
+function run_cmd_nolog_noexit() {
+    $@ &>/dev/null
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -d "$S_NAME" "[${*}] successful"
+    else $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
+}
+export -f run_cmd_nolog_noexit
+
+# If exist, cp to .bak
+# bak_if_exist path
+function bak_if_exist() {
+    [ -e "${1}" ] && run_cmd_silent cp "${1}" "${1}.bak"
+}
+export -f bak_if_exist
+
+# Create directory if not existing
+# mkdir_if_missing path_to_dir
+function mkdir_if_missing() {
+    if [ -d "${1}" ]; then
+        $S_LOG -s debug -d $S_NAME "Directory ${1} exist already"
+    else
+        mkdir --parents "${1}"
+        $S_LOG -s $? -d $S_NAME "Creating directory ${1} returned EXIT_CODE=$?"
+    fi
+}
+export -f mkdir_if_missing
+
+# Show diff with a bak
+# show_bak_diff path_to_file
+function show_bak_diff() {
+    if [ -e "${1}.bak" ]; then
+        diff --unified=0 "${1}.bak" "${1}" | $S_LOG -s warn -d "$S_NAME" -d "diff ${1}" -i
+    else
+        $S_LOG -s warn -d "$S_NAME" -d "diff ${1}" "No bak found (okay for new files)"
+    fi
+}
+export -f show_bak_diff
+
+# Show diff with a bak and delete bak
+# show_bak_diff_rm path_to_file
+function show_bak_diff_rm() {
+    show_bak_diff "${1}"
+    [ -e "${1}.bak" ] && rm "${1}.bak"
+}
+export -f show_bak_diff_rm
+
+# Check if bak and new file are different
+# is_bak_diff path_to_file
+function is_bak_diff() {
+    if [ -e "${1}.bak" ]; then
+        diff "${1}.bak" "${1}" >/dev/null 2>&1 || { return 0; }
+        return 1
+    else
+        return 0
+    fi
+}
+export -f is_bak_diff
