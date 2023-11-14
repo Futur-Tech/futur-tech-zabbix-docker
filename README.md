@@ -4,6 +4,9 @@ Zabbix template for Docker.
 The only difference with the official template is:
 - Use of Active Agent
 - deploy.sh to setup proper permission for **Zabbix Agent 2**
+- added script to check for running images update
+- added items for monitoring new images available and date for last check
+- removed 7d items data history to default 90d
 
 Works for Zabbix 6.0 Active Agent 2
 
