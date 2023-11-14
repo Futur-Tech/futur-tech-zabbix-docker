@@ -1,7 +1,7 @@
 # Zabbix Monitoring Docker
 Zabbix template for Docker.
 
-The only difference with the official template is:
+The differences with the official template are:
 - Use of Active Agent
 - deploy.sh to setup proper permission for **Zabbix Agent 2**
 - added script to check for running images update
