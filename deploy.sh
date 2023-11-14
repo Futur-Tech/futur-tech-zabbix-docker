@@ -51,7 +51,7 @@ echo "
   SETUP SCHEDULED TASK
 ------------------------------------------"
 
-$S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.cron.d/${app_name}" "/etc/cron.d/${app_name}"
+$S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.cron.d/${app_name}" "/etc/cron.d/${app_name}" "NO-BACKUP"
 
 echo "
   SETUP SUDOERS FILE
