@@ -29,8 +29,8 @@ containers=$(docker ps -q)
 for container in $containers; do
     image=$(docker inspect --format='{{.Config.Image}}' $container)
 
-    # Pull the latest version of the image and check for errors
-    if ! docker image pull $image | $S_LOG -s debug -d "$S_NAME" -d "$image" -i; then
+    # Pull the latest version of the image
+    if ! docker image pull $image; then
         $S_LOG -s err -d "$S_NAME" "Error occurred while pulling image $image."
         continue
     fi
