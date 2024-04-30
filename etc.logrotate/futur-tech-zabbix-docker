@@ -1,0 +1,10 @@
+/var/log/futur-tech-zabbix-docker_image_updates.log {
+    weekly
+    missingok
+    rotate 12
+    dateext
+    compress
+    delaycompress
+    notifempty
+    create 640 root adm
+}

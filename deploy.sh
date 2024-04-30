@@ -54,6 +54,15 @@ echo "
 $S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.cron.d/${app_name}" "/etc/cron.d/${app_name}" "NO-BACKUP"
 
 echo "
+  SETUP LOG ROTATION
+------------------------------------------"
+
+[ ! -e "/var/log/${app_name}_image_updates.log" ] && touch /var/log/${app_name}_image_updates.log
+enforce_security conf "/var/log/${app_name}_image_updates.log" adm
+
+$S_DIR/ft-util/ft_util_file-deploy "$S_DIR/etc.logrotate/${app_name}" "/etc/logrotate.d/${app_name}"
+
+echo "
   SETUP SUDOERS FILE
 ------------------------------------------"
 
