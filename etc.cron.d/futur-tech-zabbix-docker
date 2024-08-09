@@ -1,2 +1,2 @@
-# Docker image update check daily (will download the new images but not restart containers)
-30 5 * * * root /usr/local/bin/futur-tech-zabbix-docker/check_docker_image_updates.sh >/dev/null 2>&1
+# Docker image update check every 5th hour (will download the new images but not restart containers)
+30 */5 * * * root /usr/local/bin/futur-tech-zabbix-docker/check_docker_image_updates.sh >/dev/null 2>&1
