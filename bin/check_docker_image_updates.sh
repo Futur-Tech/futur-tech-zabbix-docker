@@ -70,4 +70,9 @@ for container in $containers; do
     fi
 done
 
-$S_LOG -d "$S_NAME" "Images with newer versions available: [${updated_count}] - ${updated_images_list}"
+# Formating array to comma-separated string
+updated_name_list=$(
+    IFS=,
+    echo "${updated_name[*]}"
+)
+$S_LOG -d "$S_NAME" "Images with newer versions available: [${updated_count}] - ${updated_name_list}"
