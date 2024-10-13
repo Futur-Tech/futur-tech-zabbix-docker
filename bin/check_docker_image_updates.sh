@@ -76,4 +76,4 @@ updated_names_list=$(
     IFS=,
     echo "${updated_names[*]}"
 )
-$S_LOG -d "$S_NAME" "Images with newer versions available: [${updated_count}] - ${updated_names_list}"
+$S_LOG -d "$S_NAME" "Images with newer versions available: [${updated_count}] ${updated_names_list}"
