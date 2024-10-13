@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2023-11-14T11:07:25Z'
+  date: '2024-10-13T11:53:26Z'
   groups:
     - uuid: 7f27dc73981940769811e7fae4a26772
       name: Templates/Futur-Tech/Applications
@@ -344,12 +344,6 @@ zabbix_export:
           tags:
             - tag: component
               value: images
-          triggers:
-            - uuid: de0c567cd5ce47fb9fdf8a050c1fa867
-              expression: 'last(/Futur-Tech App Docker Active Agent/docker.images.check_updates.count)>0'
-              name: 'Docker images have newer versions available'
-              opdata: '{ITEM.LASTVALUE}'
-              priority: WARNING
         - uuid: 2d900a0aec76463a9767d7a1aa9fa506
           name: 'Docker: Image updates date'
           type: ZABBIX_ACTIVE
@@ -373,6 +367,21 @@ zabbix_export:
               opdata: 'Last run: {ITEM.LASTVALUE}'
               priority: AVERAGE
               description: 'Make sure cron is setup to run /usr/local/bin/futur-tech-zabbix-docker/check_docker_image_updates.sh daily.'
+        - uuid: 35212a3cd76d496ba4945a56edea2f4f
+          name: 'Docker: Image updates names'
+          type: ZABBIX_ACTIVE
+          key: docker.images.check_updates.names
+          delay: 5m
+          trends: '0'
+          value_type: TEXT
+          description: 'Names of running images with newer versions pulled automatically by Futur-Tech-Zabbix-Docker script'
+          preprocessing:
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            - tag: component
+              value: images
         - uuid: ab4a4d92e4c04ff685b687cf14414b06
           name: 'Docker: Images available'
           type: DEPENDENT
@@ -1992,6 +2001,12 @@ zabbix_export:
               newvalue: Down
             - value: '1'
               newvalue: Up
+  triggers:
+    - uuid: de0c567cd5ce47fb9fdf8a050c1fa867
+      expression: 'last(/Futur-Tech App Docker Active Agent/docker.images.check_updates.count)>0 or length(last(/Futur-Tech App Docker Active Agent/docker.images.check_updates.names))>0'
+      name: 'Docker images have newer versions available'
+      opdata: '{ITEM.LASTVALUE} ({ITEM.LASTVALUE2})'
+      priority: WARNING
   graphs:
     - uuid: 5959831c9ec840f3af4ec7031f5213aa
       name: 'Docker: Containers'

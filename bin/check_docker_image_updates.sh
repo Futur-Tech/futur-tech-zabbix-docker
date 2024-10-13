@@ -11,6 +11,7 @@
 # - Logs the status of each image (updated or newer version available)
 # - Logs any errors encountered during the process
 # - Provides a count of images that have newer versions available
+# - Provides a comma-separated list of image nams that have newer versions available
 #
 # Log File:
 # - The results are logged in '/var/log/futur-tech-zabbix-docker_image_updates.log'
@@ -19,8 +20,8 @@ export LOG_FILE="/var/log/futur-tech-zabbix-docker_image_updates.log"
 source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_func
 source /usr/local/bin/futur-tech-zabbix-docker/ft_util_inc_var
 
-# Initialize a counter for images with updates
-update_count=0
+updated_count=0  # Initialize a counter for images with updates
+updated_names=() # Initialize an array to hold image names with updates
 
 # List all running Docker containers and get their container IDs
 containers=$(docker ps -q)
@@ -65,8 +66,14 @@ for container in $containers; do
         $S_LOG -s info -d "$S_NAME" "$image is up-to-date."
     elif [ "$running_image_id" != "$latest_image_id" ]; then
         $S_LOG -s warn -d "$S_NAME" "$image has a newer version available."
-        update_count=$((update_count + 1))
+        updated_count=$((updated_count + 1))
+        updated_names+=("$image_name")
     fi
 done
 
-$S_LOG -d "$S_NAME" "Images with newer versions available: [${update_count}]"
+# Formating array to comma-separated string
+updated_names_list=$(
+    IFS=,
+    echo "${updated_names[*]}"
+)
+$S_LOG -d "$S_NAME" "Images with newer versions available: [${updated_count}] - ${updated_names_list}"
