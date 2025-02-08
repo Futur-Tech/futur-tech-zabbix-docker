@@ -50,7 +50,7 @@ enforce_permissions() {
     local operation="$1"
     local path="$2"
 
-    if [ "$operation" == "conf" ]; then
+    if [ "$operation" == "conf" ] || [ "$operation" == "log" ] || [ "$operation" == "data" ]; then
         if [ -d "$path" ]; then
             run_cmd_log find "$path" -type d -exec chmod 750 {} +
             run_cmd_log find "$path" -type f -exec chmod 640 {} +

@@ -32,6 +32,26 @@ function deploy_git() {
 }
 export -f deploy_git
 
+# Function to check that each required variable is set to true.
+# It takes a list of variable names, and if any are not true,
+# logs a general error message listing all missing variables and exits.
+check_required_vars() {
+    local missing_vars=()
+    local var_name
+
+    for var_name in "$@"; do
+        if [ "${!var_name}" != true ]; then
+            missing_vars+=("$var_name")
+        fi
+    done
+
+    if [ ${#missing_vars[@]} -gt 0 ]; then
+        $S_LOG -s crit -d $S_NAME "The following required settings are not enabled: ${missing_vars[*]}"
+        exit 2
+    fi
+}
+export -f check_required_vars
+
 # Run command, output simple log and result
 # Exit if failed
 function run_cmd_log() {
