@@ -55,7 +55,7 @@ export -f check_required_vars
 # Run command, output simple log and result
 # Exit if failed
 function run_cmd_log() {
-    $@ 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
+    eval " $@" 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
     local exit_code=${PIPESTATUS[0]}
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"
@@ -69,7 +69,7 @@ export -f run_cmd_log
 # Run command, no log and result
 # Exit if failed
 function run_cmd_nolog() {
-    $@ &>/dev/null
+    eval " $@" &>/dev/null
     local exit_code=$?
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"
@@ -83,7 +83,7 @@ export -f run_cmd_nolog
 # Run command, no log and result output only if fail
 # Exit if failed
 function run_cmd_silent() {
-    $@ &>/dev/null
+    eval " $@" &>/dev/null
     local exit_code=$?
     if [ $exit_code -eq 0 ]; then
         $S_LOG -s debug -d "$S_NAME" "[${*}] successful"
@@ -97,7 +97,7 @@ export -f run_cmd_silent
 # Run command, output simple log and result
 # Continue if failed
 function run_cmd_log_noexit() {
-    $@ 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
+    eval " $@" 2>&1 | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
     local exit_code=${PIPESTATUS[0]}
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"
@@ -108,7 +108,7 @@ export -f run_cmd_log_noexit
 # Run command, no log and result
 # Continue if failed
 function run_cmd_nolog_noexit() {
-    $@ &>/dev/null
+    eval " $@" &>/dev/null
     local exit_code=$?
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"

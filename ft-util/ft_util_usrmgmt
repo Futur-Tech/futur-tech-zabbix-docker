@@ -38,9 +38,9 @@ enforce_ownership() {
     local user="${3:-root}" # Default user is root if not provided
 
     if [ -d "$path" ]; then
-        run_cmd_log find "$path" -exec chown "$user:$group" {} +
+        run_cmd_log find \'$path\' -exec chown $user:$group {} +
     else
-        run_cmd_log find "${path%/*}" -name "${path##*/}*" -exec chown "$user:$group" {} +
+        run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -exec chown $user:$group {} +
     fi
 }
 export -f enforce_ownership
@@ -52,25 +52,25 @@ enforce_permissions() {
 
     if [ "$operation" == "conf" ] || [ "$operation" == "log" ] || [ "$operation" == "data" ]; then
         if [ -d "$path" ]; then
-            run_cmd_log find "$path" -type d -exec chmod 750 {} +
-            run_cmd_log find "$path" -type f -exec chmod 640 {} +
+            run_cmd_log find \'$path\' -type d -exec chmod 750 {} +
+            run_cmd_log find \'$path\' -type f -exec chmod 640 {} +
         else
-            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type d -exec chmod 750 {} +
-            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type f -exec chmod 640 {} +
+            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -type d -exec chmod 750 {} +
+            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -type f -exec chmod 640 {} +
         fi
     elif [ "$operation" == "exec" ]; then
         if [ -d "$path" ]; then
-            run_cmd_log find "$path" -exec chmod 750 {} +
+            run_cmd_log find \'$path\' -exec chmod 750 {} +
         else
-            run_cmd_log find "${path%/*}" -name "${path##*/}*" -exec chmod 750 {} +
+            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -exec chmod 750 {} +
         fi
     elif [ "$operation" == "secret" ]; then
         if [ -d "$path" ]; then
-            run_cmd_log find "$path" -type d -exec chmod 700 {} +
-            run_cmd_log find "$path" -type f -exec chmod 600 {} +
+            run_cmd_log find \'$path\' -type d -exec chmod 700 {} +
+            run_cmd_log find \'$path\' -type f -exec chmod 600 {} +
         else
-            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type d -exec chmod 700 {} +
-            run_cmd_log find "${path%/*}" -name "${path##*/}*" -type f -exec chmod 600 {} +
+            run_cmd_log find \'${path%/*}\' -name \'${path##*/}\*\' -type d -exec chmod 700 {} +
+            run_cmd_log find \'${path%/*}\' -name \'${path##*/}\*\' -type f -exec chmod 600 {} +
         fi
     else
         $S_LOG -s err -d "$S_NAME" "Invalid operation: $operation"
