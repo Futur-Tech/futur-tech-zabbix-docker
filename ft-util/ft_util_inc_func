@@ -165,3 +165,27 @@ function is_bak_diff() {
     fi
 }
 export -f is_bak_diff
+
+# Simple override of variable in files (Bash or Docker environement variable definitions)
+# override_var "path_file" "VAR=" "123"
+function override_var() {
+    if grep "${2}" ${1} &>/dev/null; then
+        sed -i "s|^${2}.*|${2}${3} # ${S_NAME}|g" ${1}
+    else
+        $S_LOG -s err -d "$S_NAME" -d "${1}" "Not found \"${2}\" in configuration file"
+    fi
+}
+export -f override_var
+
+# Will generate key if empty
+# Key should only be alphanumeric and without quotes
+# override_key "path_file" "VAR="
+function override_key() {
+    key=$(sed -nr "s|${2}([[:alnum:]]+).*|\1|p" ${1})
+    if [ -z "${key}" ]; then
+        key=$(openssl rand -hex 32)
+        $S_LOG -s warn -d "$S_NAME" -d "${1}" "[New key generated] ${2}${key}"
+    fi
+    override_var "${1}" "${2}" "${key}"
+}
+export -f override_key
