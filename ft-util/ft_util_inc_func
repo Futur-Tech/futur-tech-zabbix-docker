@@ -139,7 +139,7 @@ export -f mkdir_if_missing
 # show_bak_diff path_to_file
 function show_bak_diff() {
     if [ -e "${1}.bak" ]; then
-        diff --unified=0 "${1}.bak" "${1}" | $S_LOG -s warn -d "$S_NAME" -d "diff ${1}" -i
+        diff --unified=0 "${1}.bak" "${1}" | $S_LOG -s warn -d "$S_NAME" -d "diff ${1}" -i || : # `|| :` is a workaround to "ignore" the return code of 1 from diff when file are different.
     else
         $S_LOG -s warn -d "$S_NAME" -d "diff ${1}" "No bak found (okay for new files)"
     fi
@@ -189,3 +189,29 @@ function override_key() {
     override_var "${1}" "${2}" "${key}"
 }
 export -f override_key
+
+# Function to show a prompt with yes/no options
+function confirm {
+    if [ "${skip_confirm:-false}" = "true" ]; then
+        return 0
+    fi
+
+    local prompt="$1"
+    local choice
+
+    read -p "$prompt [y/N]: " -n 1 choice
+    echo
+
+    case "$choice" in
+    y | Y) return 0 ;;
+    n | N) return 1 ;;
+    *) confirm "$prompt" ;;
+    esac
+}
+export -f confirm
+
+# Function to pause the script execution
+pause() {
+    read -r -p "Press Enter to continue..." _
+}
+export -f pause
