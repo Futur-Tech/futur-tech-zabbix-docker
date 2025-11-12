@@ -94,6 +94,20 @@ function run_cmd_silent() {
 }
 export -f run_cmd_silent
 
+# Similar to run_cmd_silent but do output the command's stdout and stderr
+# Exit if failed
+function run_cmd_quiet() {
+    eval " $@" | $S_LOG -s warn -d "$S_NAME|[${*}]" -i
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        $S_LOG -s debug -d "$S_NAME" "[${*}] successful"
+    else
+        $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"
+        exit $exit_code
+    fi
+}
+export -f run_cmd_quiet
+
 # Run command, output simple log and result
 # Continue if failed
 function run_cmd_log_noexit() {
@@ -101,7 +115,7 @@ function run_cmd_log_noexit() {
     local exit_code=${PIPESTATUS[0]}
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"
-    else $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
+    else $S_LOG -s err -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
     return $exit_code
 }
 export -f run_cmd_log_noexit
@@ -113,7 +127,7 @@ function run_cmd_nolog_noexit() {
     local exit_code=$?
     if [ $exit_code -eq 0 ]; then
         $S_LOG -d "$S_NAME" "[${*}] successful"
-    else $S_LOG -s crit -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
+    else $S_LOG -s err -d "$S_NAME" "[${*}] failed with EXIT_CODE=${exit_code}"; fi
     return $exit_code
 }
 export -f run_cmd_nolog_noexit
@@ -121,7 +135,7 @@ export -f run_cmd_nolog_noexit
 # If exist, cp to .bak
 # bak_if_exist path
 function bak_if_exist() {
-    [ -e "${1}" ] && run_cmd_silent cp "${1}" "${1}.bak"
+    [ -e "${1}" ] && run_cmd_silent cp --preserve "${1}" "${1}.bak"
 }
 export -f bak_if_exist
 

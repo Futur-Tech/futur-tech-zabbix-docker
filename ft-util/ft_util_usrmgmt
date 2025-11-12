@@ -38,9 +38,9 @@ enforce_ownership() {
     local user="${3:-root}" # Default user is root if not provided
 
     if [ -d "$path" ]; then
-        run_cmd_log find \'$path\' -exec chown $user:$group {} +
+        run_cmd_quiet find \'$path\' -exec chown --changes $user:$group {} +
     else
-        run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -exec chown $user:$group {} +
+        run_cmd_quiet find \'${path%/*}\' -maxdepth 1 -name \'${path##*/}*\' -exec chown --changes $user:$group {} +
     fi
 }
 export -f enforce_ownership
@@ -50,28 +50,34 @@ enforce_permissions() {
     local operation="$1"
     local path="$2"
 
-    if [ "$operation" == "conf" ] || [ "$operation" == "log" ] || [ "$operation" == "data" ]; then
-        if [ -d "$path" ]; then
-            run_cmd_log find \'$path\' -type d -exec chmod 750 {} +
-            run_cmd_log find \'$path\' -type f -exec chmod 640 {} +
+    set_perms() {
+        local dperm="$1" fperm="$2" def_acl="$3"
+        # Note: read (r), write (w), execute (x) permissions, execute (X) permissions if the file is a directory or already has execute permission for some user, (-) are ignored.
+        if [[ "$path" != *"*"* && -d "$path" ]]; then
+            run_cmd_quiet find \'$path\' -type d -exec setfacl --default --set $def_acl {} +
+            run_cmd_quiet find \'$path\' -type d -exec chmod --changes $dperm {} +
+            run_cmd_quiet find \'$path\' -type f -exec chmod --changes $fperm {} +
         else
-            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -type d -exec chmod 750 {} +
-            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -type f -exec chmod 640 {} +
+            local parent="${path%/*}"
+            local pattern="${path##*/}*"
+            run_cmd_quiet find \'$parent\' -maxdepth 1 -name \'$pattern\' -type d -exec setfacl --default --set $def_acl {} +
+            run_cmd_quiet find \'$parent\' -maxdepth 1 -name \'$pattern\' -type d -exec chmod --changes $dperm {} +
+            run_cmd_quiet find \'$parent\' -maxdepth 1 -name \'$pattern\' -type f -exec chmod --changes $fperm {} +
         fi
+    }
+
+    if [ "$operation" == "public_conf" ] || [ "$operation" == "public_log" ] || [ "$operation" == "public_data" ]; then
+        set_perms 755 644 "u::rwX,g::r-X,o::r-X"
+
+    elif [ "$operation" == "conf" ] || [ "$operation" == "log" ] || [ "$operation" == "data" ]; then
+        set_perms 750 640 "u::rwX,g::r-X,o::---"
+
     elif [ "$operation" == "exec" ]; then
-        if [ -d "$path" ]; then
-            run_cmd_log find \'$path\' -exec chmod 750 {} +
-        else
-            run_cmd_log find \'${path%/*}\' -name \'${path##*/}*\' -exec chmod 750 {} +
-        fi
+        set_perms 750 750 "u::rwx,g::r-x,o::---"
+
     elif [ "$operation" == "secret" ]; then
-        if [ -d "$path" ]; then
-            run_cmd_log find \'$path\' -type d -exec chmod 700 {} +
-            run_cmd_log find \'$path\' -type f -exec chmod 600 {} +
-        else
-            run_cmd_log find \'${path%/*}\' -name \'${path##*/}\*\' -type d -exec chmod 700 {} +
-            run_cmd_log find \'${path%/*}\' -name \'${path##*/}\*\' -type f -exec chmod 600 {} +
-        fi
+        set_perms 700 600 "u::rwX,g::---,o::---"
+
     else
         $S_LOG -s err -d "$S_NAME" "Invalid operation: $operation"
         return 1
@@ -85,6 +91,9 @@ enforce_security() {
     local path="$2"
     local group="${3:-root}" # Default group is root if not provided
     local user="${4:-root}"  # Default user is root if not provided
+
+    # Remove all extended ACL entries on dir
+    [[ "$path" != *"*"* && -d "$path" ]] && run_cmd_silent setfacl --recursive --remove-all \'$path\'
 
     enforce_ownership "$path" "$group" "$user"
     enforce_permissions "$operation" "$path"

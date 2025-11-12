@@ -53,20 +53,63 @@ Option **NO-COMPARE** can be specified to avoid showing diff result
 
 ## ft_util_inc_func
 
-These functions provide various utility operations related to deploying Git repositories, running commands with logging and error handling, file backup, directory creation, and file difference checking.
+Utility functions used across Futur-Tech deployment scripts.  
+They provide Git repo deployment, command execution helpers with integrated logging and error handling, backup helpers, directory creation, diff checking, variable overrides, and simple interactive helpers.
 
-- `deploy_git`: Clones a Git repository and deploys it. If the repository is already cloned, it can be redeployed by passing the "deploy-again" argument.
-- `run_cmd_log`: Runs a command, logs its output, and checks the exit code. If the command fails, it exits with the corresponding exit code.
-- `run_cmd_nolog`: Runs a command without logging its output, but still checks the exit code. If the command fails, it exits with the corresponding exit code.
-- `run_cmd_log_noexit`: Runs a command, logs its output, and checks the exit code. If the command fails, it continues without exiting.
-- `run_cmd_nolog_noexit`: Runs a command without logging its output, but still checks the exit code. If the command fails, it continues without exiting.
-- `bak_if_exist`: Makes a backup copy of a file if it exists.
-- `mkdir_if_missing`: Creates a directory if it doesn't already exist.
-- `show_bak_diff`: Shows the difference between a file and its backup (if the backup exists).
-- `show_bak_diff_rm`: Shows the difference between a file and its backup (if the backup exists) and removes the backup file.
-- `is_bak_diff`: Checks if a file and its backup (if the backup exists) are different.
+Available functions:
 
-> Script dependency:
+- `deploy_git name repo_url args deploy-again`  
+  Clone or redeploy a Git repository and execute its `deploy.sh`.
+
+- `check_required_vars var1 var2 ...`  
+  Verify required boolean vars are set; exit if any missing.
+
+- `run_cmd_log "<cmd>"`  
+  Run command with full logging; exit on failure.
+
+- `run_cmd_nolog "<cmd>"`  
+  Run command silently; exit on failure.
+
+- `run_cmd_silent "<cmd>"`  
+  Silent run, logs only debug on success; exit on failure.
+
+- `run_cmd_quiet "<cmd>"`  
+  Show command output and show result only on failure; exit on failure.
+
+- `run_cmd_log_noexit "<cmd>"`  
+  Same as `run_cmd_log` but continues on failure.
+
+- `run_cmd_nolog_noexit "<cmd>"`  
+  Silent execution without exiting on failure.
+
+- `bak_if_exist <path>`  
+  Create a `.bak` copy of a file if it exists.
+
+- `mkdir_if_missing <dir>`  
+  Create directory if missing.
+
+- `show_bak_diff <path>`  
+  Show unified diff vs backup if present.
+
+- `show_bak_diff_rm <path>`  
+  Show diff then remove backup.
+
+- `is_bak_diff <path>`  
+  Return 0 if file differs from its `.bak`.
+
+- `override_var <file> "VAR=" "value"`  
+  Replace a variable value in config files.
+
+- `override_key <file> "VAR="`  
+  Generate key if missing and set it.
+
+- `confirm "message"`  
+  Prompt y/N.
+
+- `pause`  
+  Wait for Enter key.
+
+> Script dependency:  
 > - ft_util_log
 
 ## ft_util_inc_var

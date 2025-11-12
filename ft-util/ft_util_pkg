@@ -26,7 +26,7 @@ fi
 not_installed=0
 
 for pkg in "${pkg_arr[@]}"; do
-    pkg_ok=$(dpkg-query -W --showformat='${Status}\n' $pkg 2>/dev/null | grep "install ok installed")
+    pkg_ok=$(dpkg-query -W --showformat='${Status}\n' $pkg 2>/dev/null | grep " ok installed")
     if [ "" = "$pkg_ok" ]; then
         let not_installed++
 

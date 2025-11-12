@@ -40,6 +40,10 @@ path_src=$1
 path_src_nice="${path_src/#$(dirname "${S_DIR_PATH}")\//}" # this will shorten the path_src string in order to create less text in logs (note, it will only shorten if the path is in the same ../ dir as this script)
 path_tgt=$2
 
+# Remove trailing slash
+path_src=${path_src%/}
+path_tgt=${path_tgt%/}
+
 # Grab options
 if [[ "${3}" == *"NO-BACKUP"* ]]; then opt_backup=false; else opt_backup=true; fi
 if [[ "${3}" == *"NO-COMPARE"* ]]; then opt_compare=false; else opt_compare=true; fi
@@ -56,40 +60,67 @@ $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "bkp_suffix=${bkp_suffix}"
 #############################
 
 returncode=255
-if [ -d "${path_tgt}" ]; then
+
+if [ -d "${path_src}" ]; then
+
+    # Create destination dir
+    if [ -d "${path_tgt}" ]; then
+        mkdir -p "$path_tgt"
+        $S_LOG -s $? -d "${S_NAME}|${path_src_nice}" "Creating $path_tgt returned EXIT_CODE=$?"
+    fi
 
     # Backup files
     if [ "$opt_backup" = true ]; then
-        find "${path_tgt%/}/" -type f ! -name '*.bak' | while read file; do backup_file "${file}"; done
+        find "$path_tgt/" -type f ! -name '*.bak' | while read file; do backup_file "$file"; done
     fi
 
     # Delete all the files inside the destination dir (excluding bak)
-    find "${path_tgt%/}/" -type f ! -name '*.bak' -delete 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
-    returncode=$?
-    $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Delete existing files returned EXIT_CODE=$returncode"
+    find "$path_tgt/" -type f ! -name '*.bak' -delete
+    $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Delete existing files returned EXIT_CODE=$?"
 
     # Copy dir
-    cp -R "${path_src%/}/." "${path_tgt%/}/" 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
+    cp -R "$path_src/." "$path_tgt/"
     returncode=$?
+    $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Copy files returned EXIT_CODE=$returncode"
+
+    # Apply pre-existing folder owner and group to files in folder (because cp does not respect it)
+    saved_owner="$(stat -c '%u:%g' "$path_tgt")"
+    chown -R "$saved_owner" "$path_tgt"
+    $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Chown files [$saved_owner] returned EXIT_CODE=$?"
 
     # Compare
     if [ "$opt_backup" = true ]; then
         if [ "$opt_compare" = true ]; then
-            find "${path_src%/}/" -type f ! -name '*.bak' -exec bash -c "p=\"{}\" ; p=\"${path_tgt%/}\${p#${path_src%/}}\" ; compare_file \"\${p}.${bkp_suffix}\" \"\${p}\"" \; | $S_LOG -s warn -d "${S_NAME}|${path_src_nice}|diff" -i
+            find "$path_src/" -type f ! -name '*.bak' -exec bash -c "p=\"{}\" ; p=\"$path_tgt\${p#$path_src}\" ; compare_file \"\${p}.${bkp_suffix}\" \"\${p}\"" \; | $S_LOG -s warn -d "${S_NAME}|${path_src_nice}|diff" -i
         fi
-        $S_DIR_PATH/ft_util_bak-cleaner "${path_tgt%/}/" # Cleanup backup files
+        $S_DIR_PATH/ft_util_bak-cleaner "$path_tgt/" # Cleanup backup files
     fi
 
 else
+
+    # Create parent dir if missing
+    path_tgt_d=$(dirname "$path_tgt")
+    [ -d "${path_tgt_d}" ] || mkdir -p "$path_tgt_d"
+
     if [ "$opt_backup" = true ]; then backup_file ${path_tgt}; fi # Backup file
 
-    # Create dir if missing
-    path_tgt_d=$(dirname "${path_tgt}")
-    [ -d "${path_tgt_d}" ] || mkdir -p "${path_tgt_d}"
+    # Save ACL to variable (empty if no ACL)
+    saved_acl="$(getfacl -p "$path_tgt" 2>/dev/null)"
 
     # Copy file
-    cp -p "${path_src}" "${path_tgt}" 2> >($S_LOG -s err -d "${S_NAME}|${path_src_nice}" -i) > >($S_LOG -d "${S_NAME}|${path_src_nice}" -i)
+    cp "${path_src}" "${path_tgt}"
     returncode=$? # store the exit code of the command
+
+    # Restore ACL only if variable is non-empty
+    if [ -n "$saved_acl" ]; then
+        printf '%s\n' "$saved_acl" | setfacl --restore=-
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "ACL restore returned EXIT_CODE=$?"
+    else
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "No ACL to restore. Applying Ownership from parent folder."
+        saved_owner="$(stat -c '%u:%g' "$path_tgt_d")"
+        chown "$saved_owner" "$path_tgt"
+        $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Chown file [$saved_owner] returned EXIT_CODE=$?"
+    fi
 
     # Compare
     if [ "$opt_backup" = true ]; then
