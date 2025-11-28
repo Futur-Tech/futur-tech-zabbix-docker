@@ -33,14 +33,14 @@ for container in $containers; do
     # Check for at least 5GiB free space before pulling images
     free_kb=$(df --output=avail /var/lib/docker/image | tail -n 1 | tr -d ' ')
     if [ -z "$free_kb" ] || [ "$free_kb" -lt 5242880 ]; then
-        $S_LOG -s err -d "$S_NAME" "Insufficient disk space (<5GiB). Skipping pull for $image."
-        continue
+        $S_LOG -s err -d "$S_NAME" "Insufficient disk space (<5GiB)."
+        exit 10
     fi
 
     # Pull the latest version of the image
     if ! docker image pull $image; then
         $S_LOG -s err -d "$S_NAME" "Error occurred while pulling image $image."
-        continue
+        exit 11
     fi
 
     # Get the ID of the running image
@@ -51,7 +51,7 @@ for container in $containers; do
     # Check if the running image ID is empty
     if [ -z "$running_image_id" ]; then
         $S_LOG -s err -d "$S_NAME" "Running image ID for container $container is empty."
-        continue
+        exit 12
     fi
 
     # Use docker image inspect to get the RepoDigests
@@ -66,7 +66,7 @@ for container in $containers; do
     # Check if the latest image ID is empty
     if [ -z "$latest_image_id" ]; then
         $S_LOG -s err -d "$S_NAME" "$image latest image ID for image is empty."
-        continue
+        exit 13
     fi
 
     if [ "$running_image_id" == "$latest_image_id" ]; then
