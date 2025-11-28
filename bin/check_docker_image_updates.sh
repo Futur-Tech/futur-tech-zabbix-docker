@@ -30,6 +30,13 @@ containers=$(docker ps -q)
 for container in $containers; do
     image=$(docker inspect --format='{{.Config.Image}}' $container)
 
+    # Check for at least 5GiB free space before pulling images
+    free_kb=$(df --output=avail /var/lib/docker/image | tail -n 1 | tr -d ' ')
+    if [ -z "$free_kb" ] || [ "$free_kb" -lt 5242880 ]; then
+        $S_LOG -s err -d "$S_NAME" "Insufficient disk space (<5GiB). Skipping pull for $image."
+        continue
+    fi
+
     # Pull the latest version of the image
     if ! docker image pull $image; then
         $S_LOG -s err -d "$S_NAME" "Error occurred while pulling image $image."
