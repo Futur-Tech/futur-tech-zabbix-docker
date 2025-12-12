@@ -17,7 +17,7 @@ function backup_file() {
     elif [ ! -f "$*" ]; then
         $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Backup skipped of $* (new file)"
     else
-        cp "$*" "$*.${bkp_suffix}"
+        cp --preserve=all "$*" "$*.${bkp_suffix}"
         $S_LOG -s debug -d "${S_NAME}|${path_src_nice}" "Backup done of $* > $*.${bkp_suffix}"
     fi
 }
