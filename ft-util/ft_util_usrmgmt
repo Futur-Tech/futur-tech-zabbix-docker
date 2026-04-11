@@ -72,6 +72,9 @@ enforce_permissions() {
     elif [ "$operation" == "conf" ] || [ "$operation" == "log" ] || [ "$operation" == "data" ]; then
         set_perms 750 640 "u::rwX,g::r-X,o::---"
 
+    elif [ "$operation" == "group_data" ]; then
+        set_perms 770 660 "u::rwX,g::rwX,o::---"
+
     elif [ "$operation" == "exec" ]; then
         set_perms 750 750 "u::rwx,g::r-x,o::---"
 
